@@ -115,11 +115,15 @@ function connectVisualizer(audio) {
         if (gameState.audioContext.state === 'suspended') {
             gameState.audioContext.resume();
         }
-        const source = gameState.audioContext.createMediaElementSource(audio);
-        gameState.analyser = gameState.audioContext.createAnalyser();
-        gameState.analyser.fftSize = 256;
-        source.connect(gameState.analyser);
-        gameState.analyser.connect(gameState.audioContext.destination);
+        
+        // On iOS Safari, we must only create the MediaElementSource exactly once per Audio element
+        if (!gameState.audioSourceNode) {
+            gameState.audioSourceNode = gameState.audioContext.createMediaElementSource(audio);
+            gameState.analyser = gameState.audioContext.createAnalyser();
+            gameState.analyser.fftSize = 256;
+            gameState.audioSourceNode.connect(gameState.analyser);
+            gameState.analyser.connect(gameState.audioContext.destination);
+        }
     } catch (e) {
         console.log('Visualizer setup issue:', e);
     }
@@ -128,6 +132,35 @@ function connectVisualizer(audio) {
 // ---- Start Game ----
 function startGame() {
     if (allSongsData.length === 0) return;
+
+    // Initialize & Unlock Audio Session for iOS/Safari inside the user click handler
+    if (!gameState.sharedAudio) {
+        gameState.sharedAudio = new Audio();
+        gameState.sharedAudio.crossOrigin = "anonymous";
+    }
+
+    try {
+        if (!gameState.audioContext) {
+            gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (gameState.audioContext.state === 'suspended') {
+            gameState.audioContext.resume();
+        }
+
+        // Play a silent note to trigger audio session initialization on iOS
+        const buffer = gameState.audioContext.createBuffer(1, 1, 22050);
+        const source = gameState.audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(gameState.audioContext.destination);
+        source.start(0);
+
+        // Enable native playback session for iOS 17+
+        if (navigator.audioSession) {
+            navigator.audioSession.type = 'playback';
+        }
+    } catch (e) {
+        console.log('Audio Context unlock error:', e);
+    }
 
     const count = parseInt($('songCount').value);
     gameState.totalSongs = count;
@@ -193,11 +226,18 @@ function playSong() {
     updateTimerDisplay(introDuration);
     $('timerContainer').style.opacity = '1';
 
-    // Load the FULL song file (not a clip)
-    const audio = new Audio(songData.fullFile);
+    // Reuse the unlocked global audio element (CORS enabled, iOS-safe)
+    if (!gameState.sharedAudio) {
+        gameState.sharedAudio = new Audio();
+        gameState.sharedAudio.crossOrigin = "anonymous";
+    }
+    const audio = gameState.sharedAudio;
+    audio.src = songData.fullFile;
+    audio.load(); // Force source reload
+    audio.currentTime = 0;
     gameState.currentAudio = audio;
 
-    // Connect to Web Audio API for visualizer
+    // Connect to Web Audio API for visualizer (reuses the source node)
     connectVisualizer(audio);
     startVisualizer();
 
