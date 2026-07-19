@@ -1,0 +1,13 @@
+# Ignore audio files and folders containing them
+songs/
+clips/
+*.mp3
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore Python runtime files
+__pycache__/
+*.py[cod]
+*$py.class

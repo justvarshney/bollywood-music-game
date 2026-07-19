@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Bollywood Music Quiz — Guess the Song!</title>
+    <meta name="description" content="An interactive Bollywood 90's music guessing game. Listen to 10-second clips and guess the song!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen active">
+        <div class="logo-container">
+            <div class="logo-glow"></div>
+            <div class="logo-icon">🎬</div>
+            <h1 class="game-title">
+                <span class="title-line-1">Bollywood</span>
+                <span class="title-line-2">Dinchak</span>
+                <span class="title-line-3">Music Quiz</span>
+            </h1>
+            <p class="tagline">पहचानो तो जानें! &nbsp;•&nbsp; Guess the Song!</p>
+        </div>
+
+        <div class="start-info">
+            <div class="info-card">
+                <div class="info-icon">🎧</div>
+                <div class="info-text">Listen to the <strong>music clip</strong></div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">🤔</div>
+                <div class="info-text">Guess the <strong>Bollywood song</strong></div>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">⌨️</div>
+                <div class="info-text">Press <kbd>Space</kbd> to <strong>continue</strong></div>
+            </div>
+        </div>
+
+        <div class="song-count-select">
+            <label for="songCount">How many songs to play?</label>
+            <div class="select-wrapper">
+                <select id="songCount">
+                    <option value="10">10 Songs</option>
+                    <option value="20">20 Songs</option>
+                    <option value="30">30 Songs</option>
+                    <option value="50">All 50 Songs</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="startBtn" class="btn-start" onclick="startGame()">
+            <span class="btn-text">🎶 Start Quiz</span>
+            <span class="btn-glow"></span>
+        </button>
+        <p class="start-hint">or press <kbd>Enter</kbd> to start</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <!-- Progress bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+            <div class="progress-text" id="progressText">Song 1 / 10</div>
+        </div>
+
+        <!-- Score display -->
+        <div class="score-display">
+            <div class="score-item">
+                <span class="score-label">Score</span>
+                <span class="score-value" id="scoreValue">0</span>
+            </div>
+            <div class="score-item">
+                <span class="score-label">Streak</span>
+                <span class="score-value streak" id="streakValue">0 🔥</span>
+            </div>
+        </div>
+
+        <!-- Main game area -->
+        <div class="game-area">
+            <div class="song-number" id="songNumber">Song #1</div>
+
+            <!-- Audio visualizer -->
+            <div class="visualizer-container" id="visualizerContainer">
+                <canvas id="visualizer" width="600" height="200"></canvas>
+                <div class="vinyl-record" id="vinylRecord">
+                    <div class="vinyl-inner">
+                        <div class="vinyl-label">90's</div>
+                    </div>
+                    <div class="vinyl-grooves"></div>
+                </div>
+            </div>
+
+            <!-- State: Playing -->
+            <div class="state-indicator" id="stateIndicator">
+                <div class="state-playing" id="statePlaying">
+                    <div class="equalizer">
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                        <div class="eq-bar"></div>
+                    </div>
+                    <span id="listeningText">🎵 Listening...</span>
+                    <span class="early-guess-hint" style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Press <kbd>Y</kbd> to guess early &nbsp;•&nbsp; Press <kbd>P</kbd> to pause</span>
+                </div>
+                <div class="state-guessing hidden" id="stateGuessing">
+                    <div class="guess-prompt">
+                        <span class="guess-emoji">🤔</span>
+                        <span class="guess-text">Can you name this song?</span>
+                    </div>
+                    <div class="guess-actions">
+                        <p class="action-hint">Discuss with your friends, then...</p>
+                        <div class="key-hints">
+                            <div class="key-hint">
+                                <kbd>Space</kbd>
+                                <span>Next Song →</span>
+                            </div>
+                            <div class="key-hint">
+                                <kbd>R</kbd>
+                                <span>🔄 Replay Clip</span>
+                            </div>
+                            <div class="key-hint correct-key">
+                                <kbd>Y</kbd>
+                                <span>✅ Someone Guessed It!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="state-celebrating hidden" id="stateCelebrating">
+                    <div class="celebrating-prompt">
+                        <span class="celebrating-emoji">🎉</span>
+                        <span class="celebrating-text">Correct! Song continues...</span>
+                    </div>
+                    <div class="now-playing-badge">
+                        <div class="equalizer eq-small">
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                            <div class="eq-bar"></div>
+                        </div>
+                        <span>🎶 Now Playing — Press Space for Next</span>
+                    </div>
+                    <div class="key-hints" style="margin-top: 16px;">
+                        <div class="key-hint">
+                            <kbd>Space</kbd>
+                            <span>Next Song →</span>
+                        </div>
+                        <div class="key-hint">
+                            <kbd>P</kbd>
+                            <span>⏸ Pause / Resume</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="timer-container" id="timerContainer">
+                <svg class="timer-svg" viewBox="0 0 120 120">
+                    <circle class="timer-bg" cx="60" cy="60" r="54"/>
+                    <circle class="timer-progress" id="timerProgress" cx="60" cy="60" r="54" 
+                            stroke-dasharray="339.292" stroke-dashoffset="0"/>
+                </svg>
+                <div class="timer-text" id="timerText">10</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="screen">
+        <div class="results-container">
+            <div class="results-header">
+                <div class="trophy">🏆</div>
+                <h2>Quiz Complete!</h2>
+                <p class="results-subtitle">Here's how the game went</p>
+            </div>
+
+            <div class="results-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="finalScore">0</div>
+                    <div class="stat-label">Songs Guessed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalSongs">10</div>
+                    <div class="stat-label">Total Songs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="bestStreak">0</div>
+                    <div class="stat-label">Best Streak 🔥</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="accuracy">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+
+            <div class="results-grade" id="resultsGrade"></div>
+
+            <div class="results-actions">
+                <button class="btn-start" onclick="resetGame()">
+                    <span class="btn-text">🔄 Play Again</span>
+                    <span class="btn-glow"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <script src="game.js"></script>
+</body>
+</html>
