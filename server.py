@@ -117,38 +117,57 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         """Custom clean, colorized logging with IP, Location, Device & Resource."""
-        ip = self.get_client_ip()
-        device = get_device_info(self.headers.get('User-Agent', ''))
-        location = get_location_info(ip)
-        now = datetime.datetime.now().strftime('%H:%M:%S')
+        try:
+            ip = self.get_client_ip()
+            device = get_device_info(self.headers.get('User-Agent', '') if hasattr(self, 'headers') and self.headers else '')
+            location = get_location_info(ip)
+            now = datetime.datetime.now().strftime('%H:%M:%S')
 
-        # Format status code and path
-        code = str(args[1]) if len(args) > 1 else "---"
-        path = args[0] if len(args) > 0 else self.path
+            # Extract path safely
+            path = str(self.path) if hasattr(self, 'path') and self.path else ""
+            if not path and args and isinstance(args[0], str):
+                path = args[0]
 
-        # Ignore noise for favicon or devtools
-        if "favicon.ico" in path or ".well-known" in path:
-            return
+            # Ignore noise for devtools
+            if ".well-known" in path:
+                return
 
-        # Friendly tag for song streaming
-        extra = ""
-        if "/songs/" in path:
-            song_name = path.split("/songs/")[-1].split("?")[0].split(" HTTP")[0]
-            song_name = urllib.parse.unquote(song_name)
-            extra = f" 🎶 [Song: {song_name}]"
+            # Determine status code safely
+            code = "---"
+            if len(args) >= 2 and str(args[1]).isdigit():
+                code = str(args[1])
+            elif len(args) >= 1 and hasattr(args[0], 'value'):
+                code = str(args[0].value)
+            elif len(args) >= 1 and str(args[0]).isdigit():
+                code = str(args[0])
 
-        # ANSI Colors
-        GREEN = "\033[92m"
-        CYAN = "\033[96m"
-        YELLOW = "\033[93m"
-        MAGENTA = "\033[95m"
-        GRAY = "\033[90m"
-        WHITE = "\033[97m"
-        RESET = "\033[0m"
+            # Friendly tag for song streaming
+            extra = ""
+            if "/songs/" in path:
+                song_name = path.split("/songs/")[-1].split("?")[0].split(" HTTP")[0]
+                song_name = urllib.parse.unquote(song_name)
+                extra = f" 🎶 [Song: {song_name}]"
 
-        print(f"{GRAY}[{now}]{RESET} {CYAN}{device:18}{RESET} | {YELLOW}IP: {ip:<15}{RESET} ({WHITE}{location}{RESET}) | {GREEN}{code}{RESET} {path}{MAGENTA}{extra}{RESET}", flush=True)
+            # ANSI Colors
+            GREEN = "\033[92m" if code.startswith(('2', '3')) else "\033[91m"
+            CYAN = "\033[96m"
+            YELLOW = "\033[93m"
+            MAGENTA = "\033[95m"
+            GRAY = "\033[90m"
+            WHITE = "\033[97m"
+            RESET = "\033[0m"
+
+            print(f"{GRAY}[{now}]{RESET} {CYAN}{device:18}{RESET} | {YELLOW}IP: {ip:<15}{RESET} ({WHITE}{location}{RESET}) | {GREEN}{code}{RESET} {path}{MAGENTA}{extra}{RESET}", flush=True)
+        except Exception:
+            super().log_message(format, *args)
 
     def do_GET(self):
+        # Serve favicon.ico safely if requested
+        if self.path == '/favicon.ico' and not os.path.isfile('favicon.ico'):
+            self.send_response(204)
+            self.end_headers()
+            return
+
         # Check if this is a range request
         range_header = self.headers.get('Range')
         if range_header:

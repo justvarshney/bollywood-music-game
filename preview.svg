@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080816"/>
+      <stop offset="50%" stop-color="#12122a"/>
+      <stop offset="100%" stop-color="#0a0a1c"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6b9d"/>
+      <stop offset="50%" stop-color="#c44dff"/>
+      <stop offset="100%" stop-color="#6e4dff"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4dc9ff"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#ff9d4d"/>
+    </linearGradient>
+    <radialGradient id="centerGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#c44dff" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#6e4dff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#080816" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    .title-sub { font-family: 'Outfit', -apple-system, sans-serif; font-size: 32px; font-weight: 600; letter-spacing: 12px; fill: #8e8eb4; text-anchor: middle; text-transform: uppercase; }
+    .title-main { font-family: 'Outfit', -apple-system, sans-serif; font-size: 106px; font-weight: 900; fill: url(#titleGrad); text-anchor: middle; filter: drop-shadow(0 0 35px rgba(196,77,255,0.45)); }
+    .title-tag { font-family: 'Outfit', -apple-system, sans-serif; font-size: 42px; font-weight: 700; fill: #f0f0ff; text-anchor: middle; letter-spacing: 2px; }
+    .hindi-tag { font-family: 'Noto Sans Devanagari', sans-serif; font-size: 28px; font-weight: 600; fill: #ffd700; text-anchor: middle; }
+    .feature-pill { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; fill: #ffffff; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <rect width="1200" height="630" fill="url(#centerGlow)"/>
+
+  <!-- Equalizer Wave Left -->
+  <g transform="translate(60, 360)" opacity="0.6">
+    <rect x="0" y="-30" width="8" height="60" rx="4" fill="#ff6b9d"/>
+    <rect x="16" y="-70" width="8" height="140" rx="4" fill="#c44dff"/>
+    <rect x="32" y="-110" width="8" height="220" rx="4" fill="#6e4dff"/>
+    <rect x="48" y="-45" width="8" height="90" rx="4" fill="#4dc9ff"/>
+    <rect x="64" y="-85" width="8" height="170" rx="4" fill="#34d399"/>
+    <rect x="80" y="-130" width="8" height="260" rx="4" fill="#ffd700"/>
+    <rect x="96" y="-60" width="8" height="120" rx="4" fill="#ff6b9d"/>
+    <rect x="112" y="-95" width="8" height="190" rx="4" fill="#c44dff"/>
+  </g>
+
+  <!-- Equalizer Wave Right -->
+  <g transform="translate(1010, 360)" opacity="0.6">
+    <rect x="0" y="-95" width="8" height="190" rx="4" fill="#c44dff"/>
+    <rect x="16" y="-60" width="8" height="120" rx="4" fill="#ff6b9d"/>
+    <rect x="32" y="-130" width="8" height="260" rx="4" fill="#ffd700"/>
+    <rect x="48" y="-85" width="8" height="170" rx="4" fill="#34d399"/>
+    <rect x="64" y="-45" width="8" height="90" rx="4" fill="#4dc9ff"/>
+    <rect x="80" y="-110" width="8" height="220" rx="4" fill="#6e4dff"/>
+    <rect x="96" y="-70" width="8" height="140" rx="4" fill="#c44dff"/>
+    <rect x="112" y="-30" width="8" height="60" rx="4" fill="#ff6b9d"/>
+  </g>
+
+  <!-- Clapper Icon / Emoji Header -->
+  <g transform="translate(600, 95)" text-anchor="middle">
+    <circle cx="0" cy="0" r="46" fill="#1e1b4b" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+    <text x="0" y="16" font-size="44" text-anchor="middle">🎬</text>
+  </g>
+
+  <!-- Title Text -->
+  <text x="600" y="195" class="title-sub">Bollywood</text>
+  <text x="600" y="295" class="title-main">Dinchak</text>
+  <text x="600" y="360" class="title-tag">Music Quiz Game</text>
+
+  <!-- Subtitle / Tagline -->
+  <text x="600" y="420" class="hindi-tag">पहचानो तो जानें!  •  Guess the Song &amp; Sing Along!</text>
+
+  <!-- Feature Badges Bottom -->
+  <g transform="translate(600, 520)" text-anchor="middle">
+    <!-- Pill 1 -->
+    <g transform="translate(-320, 0)">
+      <rect x="-130" y="-28" width="260" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+      <text x="0" y="8" class="feature-pill" text-anchor="middle">🎧 90's Retro Hits</text>
+    </g>
+    <!-- Pill 2 -->
+    <g transform="translate(0, 0)">
+      <rect x="-130" y="-28" width="260" height="56" rx="28" fill="rgba(255,255,255,0.08)" stroke="rgba(196,77,255,0.4)" stroke-width="1.5"/>
+      <text x="0" y="8" class="feature-pill" text-anchor="middle">📱 Mobile + Laptop</text>
+    </g>
+    <!-- Pill 3 -->
+    <g transform="translate(320, 0)">
+      <rect x="-130" y="-28" width="260" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+      <text x="0" y="8" class="feature-pill" text-anchor="middle">🎉 Party Ready</text>
+    </g>
+  </g>
+
+  <!-- Decorative Sparkles -->
+  <text x="240" y="160" font-size="28" fill="#ffd700" opacity="0.8">✨</text>
+  <text x="960" y="180" font-size="32" fill="#ffd700" opacity="0.8">✨</text>
+  <text x="210" y="460" font-size="24" fill="#ff6b9d" opacity="0.7">🎵</text>
+  <text x="980" y="470" font-size="24" fill="#4dc9ff" opacity="0.7">🎶</text>
+</svg>
