@@ -1,12 +1,12 @@
 /* ===========================
    BOLLYWOOD 90's MUSIC QUIZ
-   Mobile-First Game Engine v4
+   Mobile-First Game Engine v4.1 (High Reliability Audio)
    
    Features:
-   - Touch & Mobile First Thumb Zone Docks
-   - Dynamic Viewport Scaling & Retina Canvas Visualizer
+   - Resilient Audio Pipeline (Desktop & Mobile safe)
+   - Dynamic Thumb Zone Touch Docks
    - Host Peek & Song Reveal
-   - Haptic Feedback & Tap-to-Pause Vinyl
+   - Haptic Feedback & Gesture Support
    - Full Hybrid Keyboard Shortcut Support
    =========================== */
 
@@ -56,6 +56,55 @@ function triggerHaptic(type = 'tap') {
         // Ignore haptic errors on unsupported devices
     }
 }
+
+// ---- Audio Session & Web Audio Unlocker ----
+function ensureAudioUnlocked() {
+    if (!gameState.sharedAudio) {
+        gameState.sharedAudio = new Audio();
+        gameState.sharedAudio.preload = 'auto';
+    }
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx && !gameState.audioContext) {
+        try {
+            gameState.audioContext = new AudioCtx();
+        } catch (e) {
+            console.log('AudioContext init error:', e);
+        }
+    }
+
+    if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+        gameState.audioContext.resume().catch(() => {});
+    }
+
+    // Connect Web Audio graph once
+    if (gameState.audioContext && !gameState.audioSourceNode && gameState.sharedAudio) {
+        try {
+            gameState.audioSourceNode = gameState.audioContext.createMediaElementSource(gameState.sharedAudio);
+            gameState.analyser = gameState.audioContext.createAnalyser();
+            gameState.analyser.fftSize = 256;
+            gameState.audioSourceNode.connect(gameState.analyser);
+            gameState.analyser.connect(gameState.audioContext.destination);
+        } catch (e) {
+            console.warn('Web Audio source connection warning:', e);
+        }
+    }
+
+    if (navigator.audioSession) {
+        try {
+            navigator.audioSession.type = 'playback';
+        } catch (e) {}
+    }
+}
+
+// User Interaction listener to keep AudioContext active
+['click', 'touchstart', 'keydown'].forEach(evt => {
+    document.addEventListener(evt, () => {
+        if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+            gameState.audioContext.resume().catch(() => {});
+        }
+    }, { passive: true });
+});
 
 // ---- Load Songs Data ----
 async function loadSongsData() {
@@ -172,61 +221,12 @@ function shuffleArray(arr) {
     return shuffled;
 }
 
-// ---- Connect Audio to Web Audio API for visualizer ----
-function connectVisualizer(audio) {
-    try {
-        if (!gameState.audioContext) {
-            gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (gameState.audioContext.state === 'suspended') {
-            gameState.audioContext.resume();
-        }
-        
-        // Single MediaElementSourceNode per audio element (safe for iOS Safari)
-        if (!gameState.audioSourceNode) {
-            gameState.audioSourceNode = gameState.audioContext.createMediaElementSource(audio);
-            gameState.analyser = gameState.audioContext.createAnalyser();
-            gameState.analyser.fftSize = 256;
-            gameState.audioSourceNode.connect(gameState.analyser);
-            gameState.analyser.connect(gameState.audioContext.destination);
-        }
-    } catch (e) {
-        console.log('Visualizer setup info:', e);
-    }
-}
-
 // ---- Start Game ----
 function startGame() {
     if (allSongsData.length === 0) return;
     triggerHaptic('tap');
 
-    // Initialize & Unlock Audio Session for iOS/Safari inside the user click handler
-    if (!gameState.sharedAudio) {
-        gameState.sharedAudio = new Audio();
-        gameState.sharedAudio.crossOrigin = "anonymous";
-    }
-
-    try {
-        if (!gameState.audioContext) {
-            gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (gameState.audioContext.state === 'suspended') {
-            gameState.audioContext.resume();
-        }
-
-        // Play silent audio buffer to unlock iOS Safari Web Audio
-        const buffer = gameState.audioContext.createBuffer(1, 1, 22050);
-        const source = gameState.audioContext.createBufferSource();
-        source.buffer = buffer;
-        source.connect(gameState.audioContext.destination);
-        source.start(0);
-
-        if (navigator.audioSession) {
-            navigator.audioSession.type = 'playback';
-        }
-    } catch (e) {
-        console.log('Audio Context unlock error:', e);
-    }
+    ensureAudioUnlocked();
 
     const count = parseInt($('songCount').value) || 10;
     gameState.totalSongs = Math.min(count, allSongsData.length);
@@ -244,7 +244,7 @@ function startGame() {
     updateScoreDisplay();
     updateProgress();
 
-    setTimeout(() => playSong(), 600);
+    setTimeout(() => playSong(), 500);
 }
 
 // ---- Reset Game ----
@@ -307,28 +307,29 @@ function playSong() {
     updateTimerDisplay(introDuration);
     $('timerContainer').style.opacity = '1';
 
-    // Reuse unlocked global audio element
-    if (!gameState.sharedAudio) {
-        gameState.sharedAudio = new Audio();
-        gameState.sharedAudio.crossOrigin = "anonymous";
-    }
+    ensureAudioUnlocked();
     const audio = gameState.sharedAudio;
-    audio.src = songData.fullFile;
-    audio.load();
-    audio.currentTime = 0;
     gameState.currentAudio = audio;
 
-    // Connect Web Audio API for visualizer
-    connectVisualizer(audio);
-    startVisualizer();
+    // Set song source
+    const songSrc = encodeURI(songData.fullFile);
+    audio.src = songSrc;
+
+    // Start playback
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+                gameState.audioContext.resume().catch(() => {});
+            }
+            startVisualizer();
+        }).catch(e => {
+            console.error('Audio play failed:', e);
+        });
+    }
 
     // Update MediaSession
     updateMediaSession("🎵 Bollywood 90's Quiz", `Song #${gameState.currentSongIndex + 1} Intro`);
-
-    // Start playback
-    audio.play().catch(e => {
-        console.error('Audio play failed:', e);
-    });
 
     // Monitor playback — auto-pause at intro boundary
     gameState.timerInterval = setInterval(() => {
@@ -376,7 +377,8 @@ function replayClip() {
     if (gameState.phase !== 'guessing') return;
     triggerHaptic('tap');
 
-    const audio = gameState.currentAudio;
+    ensureAudioUnlocked();
+    const audio = gameState.currentAudio || gameState.sharedAudio;
     if (!audio) return;
 
     const introDuration = gameState.currentSongData.introDuration;
@@ -401,8 +403,15 @@ function replayClip() {
 
     // Seek back to start and play
     audio.currentTime = 0;
-    startVisualizer();
-    audio.play();
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+                gameState.audioContext.resume().catch(() => {});
+            }
+            startVisualizer();
+        }).catch(e => console.error('Replay failed:', e));
+    }
 
     gameState.timerInterval = setInterval(() => {
         if (!audio || audio.paused) return;
@@ -457,12 +466,19 @@ function markCorrect() {
 
     setDockPhase('dockCelebrating');
 
-    // Resume full song from lyrics
-    const audio = gameState.currentAudio;
+    ensureAudioUnlocked();
+    const audio = gameState.currentAudio || gameState.sharedAudio;
     if (audio) {
         audio.currentTime = gameState.currentSongData.introDuration;
-        startVisualizer();
-        audio.play().catch(e => console.error('Vocals play failed:', e));
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+                    gameState.audioContext.resume().catch(() => {});
+                }
+                startVisualizer();
+            }).catch(e => console.error('Vocals play failed:', e));
+        }
     }
 
     updateMediaSession(gameState.currentSongData.displayName, 'Bollywood 90s Hit — Sing Along!');
@@ -473,14 +489,22 @@ function replayFullSong() {
     if (gameState.phase !== 'celebrating') return;
     triggerHaptic('tap');
 
-    const audio = gameState.currentAudio;
+    ensureAudioUnlocked();
+    const audio = gameState.currentAudio || gameState.sharedAudio;
     if (audio) {
         audio.currentTime = gameState.currentSongData.introDuration;
-        audio.play();
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+                    gameState.audioContext.resume().catch(() => {});
+                }
+                startVisualizer();
+            }).catch(e => console.error('Replay vocals failed:', e));
+        }
         $('vinylRecord').classList.add('spinning');
         $('btnPauseCelebrateText').textContent = 'Pause';
         $('btnPauseCelebrateIcon').textContent = '⏸';
-        startVisualizer();
     }
 }
 
@@ -490,15 +514,24 @@ function togglePauseResume() {
     if (!playablePhases.includes(gameState.phase)) return;
 
     triggerHaptic('tap');
-    const audio = gameState.currentAudio;
+    ensureAudioUnlocked();
+    const audio = gameState.currentAudio || gameState.sharedAudio;
     if (!audio) return;
 
     if (audio.paused) {
         // Resume
-        audio.play().catch(e => console.error('Resume play failed:', e));
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
+                    gameState.audioContext.resume().catch(() => {});
+                }
+                startVisualizer();
+            }).catch(e => console.error('Resume play failed:', e));
+        }
+        
         $('vinylRecord').classList.add('spinning');
         $('vinylTapHint').textContent = 'Tap to Pause';
-        startVisualizer();
 
         if (gameState.phase === 'playing' || gameState.phase === 'replaying') {
             const introDuration = gameState.currentSongData.introDuration;
@@ -623,7 +656,6 @@ function resetPeekDrawer() {
 function cleanupAudio() {
     if (gameState.currentAudio) {
         gameState.currentAudio.pause();
-        gameState.currentAudio = null;
     }
     if (gameState.timerInterval) {
         clearInterval(gameState.timerInterval);
@@ -760,18 +792,20 @@ function clearVisualizerCanvas() {
 
 function updateMediaSession(title, artist) {
     if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: title,
-            artist: artist,
-            album: "Bollywood 90's Music Quiz",
-        });
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: title,
+                artist: artist,
+                album: "Bollywood 90's Music Quiz",
+            });
 
-        navigator.mediaSession.setActionHandler('play', () => togglePauseResume());
-        navigator.mediaSession.setActionHandler('pause', () => togglePauseResume());
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            if (gameState.phase === 'celebrating') stopCelebrationAndNext();
-            else skipSong();
-        });
+            navigator.mediaSession.setActionHandler('play', () => togglePauseResume());
+            navigator.mediaSession.setActionHandler('pause', () => togglePauseResume());
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (gameState.phase === 'celebrating') stopCelebrationAndNext();
+                else skipSong();
+            });
+        } catch (e) {}
     }
 }
 
@@ -961,4 +995,4 @@ window.addEventListener('resize', () => {
 createParticles();
 loadSongsData();
 
-console.log('🎬 Bollywood 90s Music Quiz v4 (Mobile Touch + Laptop Hybrid) Initialized!');
+console.log('🎬 Bollywood 90s Music Quiz v4.1 Initialized!');

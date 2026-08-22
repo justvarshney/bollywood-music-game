@@ -57,8 +57,6 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Content-Type', content_type)
         self.send_header('Content-Length', str(content_length))
         self.send_header('Content-Range', f'bytes {start}-{end}/{file_size}')
-        self.send_header('Accept-Ranges', 'bytes')
-        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
         # Send the requested byte range
@@ -87,14 +85,21 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', content_type)
             self.send_header('Content-Length', str(file_size))
-            self.send_header('Accept-Ranges', 'bytes')
             self.end_headers()
         else:
             self.send_error(404, 'File not found')
 
+    def do_OPTIONS(self):
+        """Handle CORS preflight requests."""
+        self.send_response(200)
+        self.end_headers()
+
     def end_headers(self):
-        # Always advertise Range support
+        # Always advertise Range support and CORS
         self.send_header('Accept-Ranges', 'bytes')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Range, Content-Type')
         super().end_headers()
 
 
