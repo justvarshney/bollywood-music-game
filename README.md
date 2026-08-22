@@ -8,10 +8,13 @@ Once someone identifies the track, a single keypress resumes the song exactly fr
 
 ## ✨ Features
 
+- **📱 Mobile-First Touch Controls & Thumb Zone**: Specially engineered dynamic bottom action dock designed for comfortable one-handed play on smartphones.
 - **⚡ Zero Teaser Clips**: Plays directly from the full song file, using precise in-browser timing to pause and resume.
 - **🔍 Intelligent Silence/Vocal Detection**: Includes a python preparation script that auto-detects where the intro music ends and lyrics begin.
+- **👁️ Host Peek Answer**: Discreet toggle for party hosts to preview the song name on mobile without revealing it to the room.
+- **📳 Haptic & Gesture Feedback**: Tactile vibration pulses on taps, correct guesses, and swipe-to-skip gestures.
 - **🛠️ Manual Calibration**: Allows you to manually tweak vocal start timestamps in `songs_data.json` for perfect pacing, which are preserved even when adding new songs.
-- **🎹 Laptop Keyboard Shortcuts**: Optimized for quick, seamless control while hosting the game.
+- **🎹 Laptop Keyboard Shortcuts**: Full hybrid support — play seamlessly on laptops or touchscreens.
 - **🎨 Premium Visuals**: Beautiful dark-mode interface with glassmorphism panels, retro vinyl spinning animations, real-time frequency bar visualizer, responsive layouts, and celebration confetti.
 - **🔁 Stream-Friendly Server**: Includes a range-request supporting local web server to guarantee fluid seeking and audio control in modern browsers.
 
@@ -19,21 +22,25 @@ Once someone identifies the track, a single keypress resumes the song exactly fr
 
 ## 🎮 How to Play
 
-1. **Start Quiz** – Choose how many songs to play (5, 10, 20, or all) and press <kbd>Enter</kbd> or click **Start**.
+1. **Start Quiz** – Choose how many songs to play with quick pill chips (5, 10, 20, 30, or all) and tap **Start Quiz** (or press <kbd>Enter</kbd>).
 2. **Listening Phase** – The retro vinyl record spins and the purple visualizer dances while the instrumental intro plays.
-3. **Guessing Phase** – The music automatically pauses before vocals start. The timer changes to `⏸` and the visualizer fades out.
+3. **Guessing Phase** – The music automatically pauses before vocals start. The timer changes to `⏸` and the visualizer pauses.
 4. **Resuming/Skipping**:
-   - If someone guesses correctly, press <kbd>Y</kbd> to resume the vocals/lyrics directly!
-   - If no one knows it, press <kbd>Space</kbd> or <kbd>→</kbd> to skip to the next track.
+   - Tap **✅ Someone Guessed It!** (or press <kbd>Y</kbd>) to resume the vocals/lyrics directly for a sing-along!
+   - Tap **⏭ Skip Song** (or swipe left / press <kbd>Space</kbd>) to move to the next track.
+   - Tap **🔄 Replay Intro** (or press <kbd>R</kbd>) if your audience wants another listen.
+   - Tap **👁️ Peek Answer** to discreetly check the track title.
 
-### ⌨️ Host Keyboard Shortcuts
-| Key | Action | Valid States |
-| :--- | :--- | :--- |
-| <kbd>Enter</kbd> / <kbd>Space</kbd> | Start Game / Replay Game | Start Screen / Results Screen |
-| <kbd>Y</kbd> | ✅ **Someone Guessed It!** (Resume song from lyrics) | Listening / Guessing |
-| <kbd>P</kbd> | ⏸ **Pause / Play** (Toggle audio playback) | Listening / Celebrating |
-| <kbd>R</kbd> | 🔄 **Replay Intro Clip** (Start intro music again) | Guessing |
-| <kbd>Space</kbd> / <kbd>→</kbd> | ⏭ **Skip / Next Song** (Move to next track) | Guessing / Celebrating |
+### 🕹️ Controls (Mobile Touch & Keyboard)
+| Action | Mobile Touch | Laptop Key | Valid States |
+| :--- | :--- | :--- | :--- |
+| **Start / Play Again** | Tap `🎶 Start Quiz` / `🔄 Play Again` | <kbd>Enter</kbd> / <kbd>Space</kbd> | Start Screen / Results |
+| **✅ Someone Guessed It!** | Tap `✅ Someone Guessed It!` or `⚡ Got It!` | <kbd>Y</kbd> | Listening / Guessing |
+| **⏸ Pause / Resume** | Tap Vinyl Record or `⏸ Pause` button | <kbd>P</kbd> | Listening / Celebrating |
+| **🔄 Replay Intro** | Tap `🔄 Replay Intro` | <kbd>R</kbd> | Guessing |
+| **⏭ Skip / Next Song** | Tap `⏭ Skip` / `⏭ Next Song` or Swipe Left | <kbd>Space</kbd> / <kbd>→</kbd> | Guessing / Celebrating |
+| **👁️ Host Peek Title** | Tap `👁️ Peek Answer (Host)` | - | Guessing |
+| **✕ Exit to Home** | Tap `✕` Top-Left Button | <kbd>Esc</kbd> | Game Screen |
 
 ---
 

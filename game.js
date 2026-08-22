@@ -1,9 +1,13 @@
 /* ===========================
    BOLLYWOOD 90's MUSIC QUIZ
-   Game Engine v3
+   Mobile-First Game Engine v4
    
-   Flow: Play full song → auto-pause at intro end → 
-         Y = resume from where paused → Space = next song
+   Features:
+   - Touch & Mobile First Thumb Zone Docks
+   - Dynamic Viewport Scaling & Retina Canvas Visualizer
+   - Host Peek & Song Reveal
+   - Haptic Feedback & Tap-to-Pause Vinyl
+   - Full Hybrid Keyboard Shortcut Support
    =========================== */
 
 // ---- Configuration ----
@@ -24,8 +28,10 @@ let gameState = {
     timeRemaining: 0,
     audioContext: null,
     analyser: null,
+    audioSourceNode: null,
+    sharedAudio: null,
     animFrameId: null,
-    currentAudio: null,      // Single audio element for the full song
+    currentAudio: null,
     currentSongData: null,
 };
 
@@ -34,6 +40,22 @@ const $ = (id) => document.getElementById(id);
 const startScreen = $('startScreen');
 const gameScreen = $('gameScreen');
 const resultsScreen = $('resultsScreen');
+
+// ---- Haptic Feedback Helper ----
+function triggerHaptic(type = 'tap') {
+    if (!navigator.vibrate) return;
+    try {
+        if (type === 'tap') {
+            navigator.vibrate(12);
+        } else if (type === 'success') {
+            navigator.vibrate([25, 40, 25]);
+        } else if (type === 'skip') {
+            navigator.vibrate(18);
+        }
+    } catch (e) {
+        // Ignore haptic errors on unsupported devices
+    }
+}
 
 // ---- Load Songs Data ----
 async function loadSongsData() {
@@ -52,23 +74,53 @@ async function loadSongsData() {
         const hint = document.createElement('p');
         hint.className = 'start-hint';
         hint.style.color = '#ff6b9d';
-        hint.innerHTML = 'Run <kbd>bash prepare.sh</kbd> first to prepare songs';
+        hint.innerHTML = 'Run <kbd>python3 prepare.py</kbd> first to prepare songs';
         $('startBtn').parentNode.insertBefore(hint, $('startBtn').nextSibling);
     }
 }
 
+// ---- Song Count Pills & Selector ----
 function updateSongCountOptions() {
+    const total = allSongsData.length;
     const select = $('songCount');
     select.innerHTML = '';
-    const total = allSongsData.length;
-    const options = [5, 10, 15, 20, 30, 50].filter(n => n <= total);
-    if (!options.includes(total)) options.push(total);
-    options.forEach(n => {
+    
+    const countOptions = [5, 10, 20, 30].filter(n => n < total);
+    if (!countOptions.includes(total)) countOptions.push(total);
+
+    countOptions.forEach(n => {
         const opt = document.createElement('option');
         opt.value = n;
         opt.textContent = n === total ? `All ${total} Songs` : `${n} Songs`;
         if (n === Math.min(10, total)) opt.selected = true;
         select.appendChild(opt);
+    });
+
+    // Setup pill buttons
+    const pillsContainer = $('songCountPills');
+    pillsContainer.innerHTML = '';
+
+    const pillValues = [5, 10, 20, 30].filter(n => n <= total);
+    if (!pillValues.includes(total)) pillValues.push('all');
+
+    pillValues.forEach(val => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'count-pill';
+        btn.dataset.count = val;
+        btn.textContent = val === 'all' ? `All (${total})` : val;
+        
+        const isDefault = (val === 10 || (val === total && total < 10));
+        if (isDefault) btn.classList.add('active');
+
+        btn.addEventListener('click', () => {
+            triggerHaptic('tap');
+            document.querySelectorAll('.count-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            select.value = val === 'all' ? total : val;
+        });
+
+        pillsContainer.appendChild(btn);
     });
 }
 
@@ -76,10 +128,10 @@ function updateSongCountOptions() {
 function createParticles() {
     const container = $('bgParticles');
     const colors = ['#ff6b9d', '#c44dff', '#6e4dff', '#4dc9ff', '#ffd700'];
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 24; i++) {
         const particle = document.createElement('div');
         particle.classList.add('particle');
-        const size = Math.random() * 6 + 2;
+        const size = Math.random() * 5 + 2;
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
         particle.style.left = Math.random() * 100 + '%';
@@ -94,6 +146,20 @@ function createParticles() {
 function showScreen(screen) {
     [startScreen, gameScreen, resultsScreen].forEach(s => s.classList.remove('active'));
     screen.classList.add('active');
+}
+
+// ---- Action Dock Phase Switcher ----
+function setDockPhase(phaseId) {
+    ['dockPlaying', 'dockGuessing', 'dockCelebrating'].forEach(id => {
+        const dock = $(id);
+        if (dock) {
+            if (id === phaseId) {
+                dock.classList.add('active');
+            } else {
+                dock.classList.remove('active');
+            }
+        }
+    });
 }
 
 // ---- Shuffle Array ----
@@ -116,7 +182,7 @@ function connectVisualizer(audio) {
             gameState.audioContext.resume();
         }
         
-        // On iOS Safari, we must only create the MediaElementSource exactly once per Audio element
+        // Single MediaElementSourceNode per audio element (safe for iOS Safari)
         if (!gameState.audioSourceNode) {
             gameState.audioSourceNode = gameState.audioContext.createMediaElementSource(audio);
             gameState.analyser = gameState.audioContext.createAnalyser();
@@ -125,13 +191,14 @@ function connectVisualizer(audio) {
             gameState.analyser.connect(gameState.audioContext.destination);
         }
     } catch (e) {
-        console.log('Visualizer setup issue:', e);
+        console.log('Visualizer setup info:', e);
     }
 }
 
 // ---- Start Game ----
 function startGame() {
     if (allSongsData.length === 0) return;
+    triggerHaptic('tap');
 
     // Initialize & Unlock Audio Session for iOS/Safari inside the user click handler
     if (!gameState.sharedAudio) {
@@ -147,14 +214,13 @@ function startGame() {
             gameState.audioContext.resume();
         }
 
-        // Play a silent note to trigger audio session initialization on iOS
+        // Play silent audio buffer to unlock iOS Safari Web Audio
         const buffer = gameState.audioContext.createBuffer(1, 1, 22050);
         const source = gameState.audioContext.createBufferSource();
         source.buffer = buffer;
         source.connect(gameState.audioContext.destination);
         source.start(0);
 
-        // Enable native playback session for iOS 17+
         if (navigator.audioSession) {
             navigator.audioSession.type = 'playback';
         }
@@ -162,8 +228,8 @@ function startGame() {
         console.log('Audio Context unlock error:', e);
     }
 
-    const count = parseInt($('songCount').value);
-    gameState.totalSongs = count;
+    const count = parseInt($('songCount').value) || 10;
+    gameState.totalSongs = Math.min(count, allSongsData.length);
     gameState.currentSongIndex = 0;
     gameState.score = 0;
     gameState.streak = 0;
@@ -171,20 +237,30 @@ function startGame() {
     gameState.phase = 'idle';
 
     const allIndices = Array.from({ length: allSongsData.length }, (_, i) => i);
-    gameState.songOrder = shuffleArray(allIndices).slice(0, count);
+    gameState.songOrder = shuffleArray(allIndices).slice(0, gameState.totalSongs);
 
     showScreen(gameScreen);
+    resizeVisualizerCanvas();
     updateScoreDisplay();
     updateProgress();
 
-    setTimeout(() => playSong(), 800);
+    setTimeout(() => playSong(), 600);
 }
 
 // ---- Reset Game ----
 function resetGame() {
+    triggerHaptic('tap');
     gameState.phase = 'idle';
     cleanupAudio();
     showScreen(startScreen);
+}
+
+// ---- Exit Game Confirmation ----
+function confirmExitGame() {
+    triggerHaptic('tap');
+    if (confirm('Exit quiz and return to home screen?')) {
+        resetGame();
+    }
 }
 
 // ======================================================
@@ -210,12 +286,17 @@ function playSong() {
 
     const introDuration = songData.introDuration;
 
-    // Update UI
-    $('songNumber').textContent = `Song #${gameState.currentSongIndex + 1}`;
+    // Reset UI & Host Peek
     $('statePlaying').classList.remove('hidden');
     $('stateGuessing').classList.add('hidden');
     $('stateCelebrating').classList.add('hidden');
-    $('listeningText').textContent = `🎵 Listening... (Intro: ${introDuration}s)`;
+    $('listeningText').textContent = `🎵 Listening... (${introDuration}s)`;
+    $('vinylTapHint').textContent = 'Tap to Pause';
+    $('btnPausePlayingText').textContent = 'Pause';
+    $('btnPausePlayingIcon').textContent = '⏸';
+
+    resetPeekDrawer();
+    setDockPhase('dockPlaying');
     updateProgress();
 
     // Start vinyl spinning
@@ -226,22 +307,25 @@ function playSong() {
     updateTimerDisplay(introDuration);
     $('timerContainer').style.opacity = '1';
 
-    // Reuse the unlocked global audio element (CORS enabled, iOS-safe)
+    // Reuse unlocked global audio element
     if (!gameState.sharedAudio) {
         gameState.sharedAudio = new Audio();
         gameState.sharedAudio.crossOrigin = "anonymous";
     }
     const audio = gameState.sharedAudio;
     audio.src = songData.fullFile;
-    audio.load(); // Force source reload
+    audio.load();
     audio.currentTime = 0;
     gameState.currentAudio = audio;
 
-    // Connect to Web Audio API for visualizer (reuses the source node)
+    // Connect Web Audio API for visualizer
     connectVisualizer(audio);
     startVisualizer();
 
-    // Start playing from the beginning
+    // Update MediaSession
+    updateMediaSession("🎵 Bollywood 90's Quiz", `Song #${gameState.currentSongIndex + 1} Intro`);
+
+    // Start playback
     audio.play().catch(e => {
         console.error('Audio play failed:', e);
     });
@@ -254,43 +338,48 @@ function playSong() {
         gameState.timeRemaining = Math.max(0, introDuration - elapsed);
         updateTimerDisplay(introDuration);
 
-        // Pause when we hit the intro boundary
+        // Pause right at intro end
         if (elapsed >= introDuration) {
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = null;
-            audio.pause(); // Pause right at the intro end
+            audio.pause();
             onIntroFinished();
         }
-    }, 50); // 50ms for smooth timer + precise pause
+    }, 50);
 }
 
 // ---- Intro Finished → Pause for Guessing ----
 function onIntroFinished() {
     gameState.phase = 'guessing';
 
-    // Stop vinyl
+    // Stop vinyl and visualizer
     $('vinylRecord').classList.remove('spinning');
-
-    // Stop visualizer
     stopVisualizer();
 
     // Update UI
     $('statePlaying').classList.add('hidden');
     $('stateGuessing').classList.remove('hidden');
     $('stateCelebrating').classList.add('hidden');
-    $('timerContainer').style.opacity = '0.3';
+    $('timerContainer').style.opacity = '0.35';
     $('timerText').textContent = '⏸';
+    $('vinylTapHint').textContent = 'Intro Paused';
+
+    setDockPhase('dockGuessing');
+
+    if (navigator.mediaSession) {
+        navigator.mediaSession.playbackState = 'paused';
+    }
 }
 
 // ---- Replay Intro: Seek back to 0, play until intro end again ----
 function replayClip() {
     if (gameState.phase !== 'guessing') return;
+    triggerHaptic('tap');
 
     const audio = gameState.currentAudio;
     if (!audio) return;
 
     const introDuration = gameState.currentSongData.introDuration;
-
     gameState.phase = 'replaying';
 
     // Update UI
@@ -298,19 +387,23 @@ function replayClip() {
     $('statePlaying').classList.remove('hidden');
     $('stateGuessing').classList.add('hidden');
     $('stateCelebrating').classList.add('hidden');
+    $('listeningText').textContent = `🎵 Listening... (${introDuration}s)`;
+    $('vinylTapHint').textContent = 'Tap to Pause';
+    $('btnPausePlayingText').textContent = 'Pause';
+    $('btnPausePlayingIcon').textContent = '⏸';
 
-    $('listeningText').textContent = `🎵 Listening... (Intro: ${introDuration}s)`;
+    setDockPhase('dockPlaying');
+
     // Reset timer
     gameState.timeRemaining = introDuration;
     updateTimerDisplay(introDuration);
     $('timerContainer').style.opacity = '1';
 
-    // Seek back to beginning and play
+    // Seek back to start and play
     audio.currentTime = 0;
     startVisualizer();
     audio.play();
 
-    // Monitor and pause at intro end again
     gameState.timerInterval = setInterval(() => {
         if (!audio || audio.paused) return;
 
@@ -327,20 +420,19 @@ function replayClip() {
     }, 50);
 }
 
-// ---- Correct Guess → Resume playing from where it paused or skip remaining music ----
+// ---- Correct Guess → Resume playing lyrics & sing along ----
 function markCorrect() {
     const validPhases = ['guessing', 'playing', 'replaying'];
     if (!validPhases.includes(gameState.phase)) return;
 
-    const wasPlaying = gameState.phase === 'playing' || gameState.phase === 'replaying';
+    triggerHaptic('success');
 
-    // Clear timer checking since we've finished the guessing phase
     if (gameState.timerInterval) {
         clearInterval(gameState.timerInterval);
         gameState.timerInterval = null;
     }
 
-    // Update score
+    // Update score & streak
     gameState.score++;
     gameState.streak++;
     if (gameState.streak > gameState.bestStreak) {
@@ -356,36 +448,58 @@ function markCorrect() {
     $('statePlaying').classList.add('hidden');
     $('stateGuessing').classList.add('hidden');
     $('stateCelebrating').classList.remove('hidden');
+    $('celebratingSongTitle').textContent = gameState.currentSongData.displayName;
     $('vinylRecord').classList.add('spinning');
+    $('vinylTapHint').textContent = 'Tap to Pause';
     $('timerContainer').style.opacity = '0';
+    $('btnPauseCelebrateText').textContent = 'Pause';
+    $('btnPauseCelebrateIcon').textContent = '⏸';
 
-    // Resume/play full song
+    setDockPhase('dockCelebrating');
+
+    // Resume full song from lyrics
     const audio = gameState.currentAudio;
     if (audio) {
-        // Jump directly to the start of the lyrics/vocals!
         audio.currentTime = gameState.currentSongData.introDuration;
         startVisualizer();
-        audio.play().catch(e => {
-            console.error('Play/resume failed:', e);
-        });
+        audio.play().catch(e => console.error('Vocals play failed:', e));
+    }
+
+    updateMediaSession(gameState.currentSongData.displayName, 'Bollywood 90s Hit — Sing Along!');
+}
+
+// ---- Replay Full Song Vocals in celebration phase ----
+function replayFullSong() {
+    if (gameState.phase !== 'celebrating') return;
+    triggerHaptic('tap');
+
+    const audio = gameState.currentAudio;
+    if (audio) {
+        audio.currentTime = gameState.currentSongData.introDuration;
+        audio.play();
+        $('vinylRecord').classList.add('spinning');
+        $('btnPauseCelebrateText').textContent = 'Pause';
+        $('btnPauseCelebrateIcon').textContent = '⏸';
+        startVisualizer();
     }
 }
 
-// ---- Toggle Pause / Resume during active play phases ----
+// ---- Toggle Pause / Resume during active audio playback ----
 function togglePauseResume() {
     const playablePhases = ['playing', 'replaying', 'celebrating'];
     if (!playablePhases.includes(gameState.phase)) return;
 
+    triggerHaptic('tap');
     const audio = gameState.currentAudio;
     if (!audio) return;
 
     if (audio.paused) {
-        // Resume playback
+        // Resume
         audio.play().catch(e => console.error('Resume play failed:', e));
         $('vinylRecord').classList.add('spinning');
+        $('vinylTapHint').textContent = 'Tap to Pause';
         startVisualizer();
 
-        // If we are in an intro phase, restart the timer countdown
         if (gameState.phase === 'playing' || gameState.phase === 'replaying') {
             const introDuration = gameState.currentSongData.introDuration;
             if (gameState.timerInterval) clearInterval(gameState.timerInterval);
@@ -404,25 +518,43 @@ function togglePauseResume() {
                     onIntroFinished();
                 }
             }, 50);
+
+            $('btnPausePlayingText').textContent = 'Pause';
+            $('btnPausePlayingIcon').textContent = '⏸';
+        } else {
+            $('btnPauseCelebrateText').textContent = 'Pause';
+            $('btnPauseCelebrateIcon').textContent = '⏸';
         }
+
         showScorePop('▶ Play');
     } else {
-        // Pause playback
+        // Pause
         audio.pause();
         $('vinylRecord').classList.remove('spinning');
+        $('vinylTapHint').textContent = 'Tap to Play';
         stopVisualizer();
 
         if (gameState.timerInterval) {
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = null;
         }
+
+        if (gameState.phase === 'playing' || gameState.phase === 'replaying') {
+            $('btnPausePlayingText').textContent = 'Resume';
+            $('btnPausePlayingIcon').textContent = '▶';
+        } else {
+            $('btnPauseCelebrateText').textContent = 'Resume';
+            $('btnPauseCelebrateIcon').textContent = '▶';
+        }
+
         showScorePop('⏸ Pause');
     }
 }
 
-// ---- Stop celebration and go to next ----
+// ---- Next Song after celebration ----
 function stopCelebrationAndNext() {
     if (gameState.phase !== 'celebrating') return;
+    triggerHaptic('tap');
 
     $('vinylRecord').classList.remove('spinning');
     stopVisualizer();
@@ -430,21 +562,23 @@ function stopCelebrationAndNext() {
     gameState.phase = 'transitioning';
     gameState.currentSongIndex++;
 
-    // Pause but don't destroy (cleanup happens in playSong)
     if (gameState.currentAudio) {
         gameState.currentAudio.pause();
     }
 
     if (gameState.currentSongIndex >= gameState.totalSongs) {
-        setTimeout(() => showResults(), 500);
+        setTimeout(() => showResults(), 400);
     } else {
-        setTimeout(() => playSong(), 600);
+        setTimeout(() => playSong(), 500);
     }
 }
 
 // ---- Skip Song (no correct guess) ----
 function skipSong() {
-    if (gameState.phase !== 'guessing') return;
+    const validPhases = ['guessing', 'playing', 'replaying'];
+    if (!validPhases.includes(gameState.phase)) return;
+
+    triggerHaptic('skip');
     gameState.streak = 0;
     updateScoreDisplay();
 
@@ -457,10 +591,32 @@ function skipSong() {
     gameState.currentSongIndex++;
 
     if (gameState.currentSongIndex >= gameState.totalSongs) {
-        setTimeout(() => showResults(), 500);
+        setTimeout(() => showResults(), 400);
     } else {
-        setTimeout(() => playSong(), 600);
+        setTimeout(() => playSong(), 500);
     }
+}
+
+// ---- Host Peek Answer Drawer ----
+function togglePeekSong() {
+    triggerHaptic('tap');
+    const peekResult = $('peekResult');
+    const peekLabel = $('peekLabel');
+    const isHidden = peekResult.classList.contains('hidden');
+
+    if (isHidden) {
+        $('peekSongName').textContent = gameState.currentSongData ? gameState.currentSongData.displayName : '';
+        peekResult.classList.remove('hidden');
+        peekLabel.textContent = 'Hide Answer';
+    } else {
+        peekResult.classList.add('hidden');
+        peekLabel.textContent = 'Peek Answer (Host)';
+    }
+}
+
+function resetPeekDrawer() {
+    $('peekResult').classList.add('hidden');
+    $('peekLabel').textContent = 'Peek Answer (Host)';
 }
 
 // ---- Cleanup Audio ----
@@ -486,7 +642,7 @@ function stopVisualizer() {
 }
 
 // ======================================================
-// UI HELPERS
+// UI HELPERS & DYNAMIC CANVAS
 // ======================================================
 
 function updateScoreDisplay() {
@@ -506,8 +662,9 @@ function updateTimerDisplay(totalDuration) {
 
     const circumference = 2 * Math.PI * 54;
     const offset = circumference * (1 - gameState.timeRemaining / totalDuration);
-    $('timerProgress').style.strokeDashoffset = offset;
-    $('timerProgress').style.stroke = gameState.timeRemaining <= 3 ? '#ff6b9d' : '#c44dff';
+    const progressEl = $('timerProgress');
+    progressEl.style.strokeDashoffset = offset;
+    progressEl.style.stroke = gameState.timeRemaining <= 3 ? '#ff6b9d' : '#c44dff';
 }
 
 function showScorePop(text) {
@@ -515,7 +672,23 @@ function showScorePop(text) {
     pop.className = 'score-pop correct';
     pop.textContent = text;
     document.body.appendChild(pop);
-    setTimeout(() => pop.remove(), 1000);
+    setTimeout(() => pop.remove(), 900);
+}
+
+// ---- Dynamic Canvas Resizing for Retina/Mobile displays ----
+function resizeVisualizerCanvas() {
+    const canvas = $('visualizer');
+    const container = $('visualizerContainer');
+    if (!canvas || !container) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
 }
 
 // ======================================================
@@ -528,6 +701,7 @@ function startVisualizer() {
     }
 
     const canvas = $('visualizer');
+    const container = $('visualizerContainer');
     const ctx = canvas.getContext('2d');
     const analyser = gameState.analyser;
     if (!analyser) return;
@@ -538,32 +712,33 @@ function startVisualizer() {
     function draw() {
         gameState.animFrameId = requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const barWidth = (canvas.width / bufferLength) * 2;
+        const dpr = window.devicePixelRatio || 1;
+        const width = canvas.width / dpr;
+        const height = canvas.height / dpr;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const barCount = Math.min(bufferLength, 48);
+        const barWidth = width / barCount;
         let x = 0;
 
-        for (let i = 0; i < bufferLength; i++) {
-            const barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
-            const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+        for (let i = 0; i < barCount; i++) {
+            const barHeight = (dataArray[i] / 255) * height * 0.75;
+            const gradient = ctx.createLinearGradient(0, height, 0, height - barHeight);
 
             if (gameState.phase === 'celebrating') {
-                const hue = (i / bufferLength) * 40 + 140;
+                const hue = (i / barCount) * 40 + 140;
                 gradient.addColorStop(0, `hsla(${hue}, 70%, 55%, 0.8)`);
                 gradient.addColorStop(1, `hsla(${hue}, 70%, 65%, 0.2)`);
             } else {
-                const hue = (i / bufferLength) * 60 + 300;
+                const hue = (i / barCount) * 60 + 300;
                 gradient.addColorStop(0, `hsla(${hue}, 80%, 60%, 0.8)`);
                 gradient.addColorStop(1, `hsla(${hue}, 80%, 70%, 0.2)`);
             }
 
             ctx.fillStyle = gradient;
-            ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
-
-            ctx.fillStyle = gameState.phase === 'celebrating'
-                ? `hsla(150, 70%, 55%, 0.1)`
-                : `hsla(300, 80%, 60%, 0.1)`;
-            ctx.fillRect(x, 0, barWidth - 1, barHeight * 0.3);
+            ctx.fillRect(x + 1, height - barHeight, barWidth - 2, barHeight);
 
             x += barWidth;
         }
@@ -574,8 +749,30 @@ function startVisualizer() {
 
 function clearVisualizerCanvas() {
     const canvas = $('visualizer');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ======================================================
+// MEDIA SESSION API (Lock Screen & Bluetooth Controls)
+// ======================================================
+
+function updateMediaSession(title, artist) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: title,
+            artist: artist,
+            album: "Bollywood 90's Music Quiz",
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => togglePauseResume());
+        navigator.mediaSession.setActionHandler('pause', () => togglePauseResume());
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            if (gameState.phase === 'celebrating') stopCelebrationAndNext();
+            else skipSong();
+        });
+    }
 }
 
 // ======================================================
@@ -618,14 +815,14 @@ function launchConfetti() {
     const pieces = [];
     const colors = ['#ff6b9d', '#c44dff', '#6e4dff', '#4dc9ff', '#ffd700', '#50c878', '#ff9d4d'];
 
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 120; i++) {
         pieces.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height - canvas.height,
-            w: Math.random() * 10 + 5,
-            h: Math.random() * 6 + 3,
+            w: Math.random() * 9 + 4,
+            h: Math.random() * 5 + 3,
             color: colors[Math.floor(Math.random() * colors.length)],
-            speed: Math.random() * 4 + 2,
+            speed: Math.random() * 3.5 + 2,
             angle: Math.random() * Math.PI * 2,
             spin: (Math.random() - 0.5) * 0.2,
             drift: (Math.random() - 0.5) * 2,
@@ -652,7 +849,7 @@ function launchConfetti() {
                 ctx.restore();
             }
         });
-        if (stillVisible && frame < 300) {
+        if (stillVisible && frame < 280) {
             requestAnimationFrame(animateConfetti);
         } else {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -662,7 +859,7 @@ function launchConfetti() {
 }
 
 // ======================================================
-// KEYBOARD CONTROLS
+// KEYBOARD CONTROLS (Laptop Hybrid Support)
 // ======================================================
 
 document.addEventListener('keydown', (e) => {
@@ -690,6 +887,8 @@ document.addEventListener('keydown', (e) => {
             e.preventDefault();
             if (gameState.phase === 'guessing') {
                 replayClip();
+            } else if (gameState.phase === 'celebrating') {
+                replayFullSong();
             }
         } else if (key === 'y') {
             e.preventDefault();
@@ -700,6 +899,8 @@ document.addEventListener('keydown', (e) => {
         } else if (key === 'p') {
             e.preventDefault();
             togglePauseResume();
+        } else if (key === 'escape') {
+            confirmExitGame();
         }
         return;
     }
@@ -713,15 +914,51 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ======================================================
+// TOUCH SWIPE GESTURES
+// ======================================================
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    if (!gameScreen.classList.contains('active')) return;
+    if (e.changedTouches.length === 1) {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // Swipe Left (skip or next)
+        if (diffX < -70 && Math.abs(diffY) < 40) {
+            if (gameState.phase === 'guessing') {
+                skipSong();
+            } else if (gameState.phase === 'celebrating') {
+                stopCelebrationAndNext();
+            }
+        }
+    }
+}, { passive: true });
+
 // ---- Handle window resize ----
 window.addEventListener('resize', () => {
+    resizeVisualizerCanvas();
     const canvas = $('confettiCanvas');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
 });
 
 // ---- Initialize ----
 createParticles();
 loadSongsData();
 
-console.log('🎬 Bollywood 90s Music Quiz v3 — Play intro → Pause → Resume on correct guess!');
+console.log('🎬 Bollywood 90s Music Quiz v4 (Mobile Touch + Laptop Hybrid) Initialized!');
