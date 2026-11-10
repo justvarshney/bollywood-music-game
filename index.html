@@ -33,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3.1">
+    <link rel="stylesheet" href="style.css?v=4.0">
 </head>
 <body>
     <!-- Animated background particles -->
@@ -52,6 +52,20 @@
                     <span class="hub-title-line-2">Night</span>
                 </h1>
                 <p class="hub-tagline">पहचानो तो जानें! • 5 Thrilling Party Games in 1</p>
+
+                <!-- Display Settings (Theme & TV/Projector Mode) -->
+                <div class="hub-controls-bar">
+                    <button type="button" class="btn-display-toggle" id="hubThemeToggle" onclick="toggleTheme()" title="Toggle Light / Dark Theme (Shortcut: T)">
+                        <span class="toggle-icon" id="hubThemeIcon">☀️</span>
+                        <span class="toggle-label" id="hubThemeLabel">Light Theme</span>
+                        <kbd class="kbd-badge-sub">T</kbd>
+                    </button>
+                    <button type="button" class="btn-display-toggle" id="hubTvToggle" onclick="toggleTvMode()" title="Toggle TV / Projector Mode (Shortcut: B)">
+                        <span class="toggle-icon">📺</span>
+                        <span class="toggle-label" id="hubTvLabel">TV / Projector Mode</span>
+                        <kbd class="kbd-badge-sub">B</kbd>
+                    </button>
+                </div>
             </header>
 
             <!-- Games Grid -->
@@ -204,6 +218,10 @@
                 <button type="button" class="btn-back-hub" onclick="openGameHub()" title="Return to All Games Hub">
                     ← 🏠 All Games Hub
                 </button>
+                <div class="header-quick-tools">
+                    <button type="button" class="btn-icon-tool btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme (T)">☀️</button>
+                    <button type="button" class="btn-icon-tool btn-tv-toggle" onclick="toggleTvMode()" title="Toggle TV / Projector Mode (B)">📺</button>
+                </div>
             </div>
 
             <div class="logo-container">
@@ -274,6 +292,10 @@
                     ✕
                 </button>
                 <div class="header-progress" id="progressText">Song 1 / 10</div>
+                <div class="header-quick-tools">
+                    <button type="button" class="btn-icon-tool btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme (T)">☀️</button>
+                    <button type="button" class="btn-icon-tool btn-tv-toggle" id="gameTvTool" onclick="toggleTvMode()" title="Toggle TV / Projector Mode (B)">📺</button>
+                </div>
                 <div class="score-display">
                     <div class="score-pill">
                         <span class="score-label">Score</span>
@@ -491,6 +513,10 @@
                 <button type="button" class="btn-back-hub" onclick="openGameHub()" title="Return to All Games Hub">
                     ← 🏠 All Games Hub
                 </button>
+                <div class="header-quick-tools">
+                    <button type="button" class="btn-icon-tool btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme (T)">☀️</button>
+                    <button type="button" class="btn-icon-tool btn-tv-toggle" onclick="toggleTvMode()" title="Toggle TV / Projector Mode (B)">📺</button>
+                </div>
             </div>
 
             <div class="logo-container">
@@ -555,6 +581,10 @@
                     ✕
                 </button>
                 <div class="header-progress" id="partyProgressText">🎬 1 / 10</div>
+                <div class="header-quick-tools">
+                    <button type="button" class="btn-icon-tool btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme (T)">☀️</button>
+                    <button type="button" class="btn-icon-tool btn-tv-toggle" id="partyTvTool" onclick="toggleTvMode()" title="Toggle TV / Projector Mode (B)">📺</button>
+                </div>
                 <div class="score-display">
                     <div class="score-pill">
                         <span class="score-label">Score</span>
@@ -666,7 +696,7 @@
     <!-- Confetti canvas -->
     <canvas id="confettiCanvas"></canvas>
 
-    <script src="game.js?v=3.1"></script>
-    <script src="party_games.js?v=3.1"></script>
+    <script src="game.js?v=4.0"></script>
+    <script src="party_games.js?v=4.0"></script>
 </body>
 </html>

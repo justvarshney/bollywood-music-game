@@ -680,6 +680,18 @@
 
         const key = e.key.toLowerCase();
 
+        // Theme and TV Mode shortcuts
+        if (key === 't') {
+            e.preventDefault();
+            if (typeof window.toggleTheme === 'function') window.toggleTheme();
+            return;
+        }
+        if (key === 'b') {
+            e.preventDefault();
+            if (typeof window.toggleTvMode === 'function') window.toggleTvMode();
+            return;
+        }
+
         // Guessed / Correct: Y or Enter
         if (key === 'y' || (key === 'enter' && partyState.status === 'active')) {
             e.preventDefault();

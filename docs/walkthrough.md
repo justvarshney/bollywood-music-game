@@ -64,6 +64,33 @@ All original music quiz features (audio auto-pause/sing-along, vinyl visualizer,
 
 ---
 
+## ☀️ Optional Light Theme & 📺 Big Screen / TV Projection Mode
+
+### 1. Optional High-Contrast Light Theme
+- Added a full daylight/high-contrast design system activated via `data-theme="light"`.
+- Features crisp ivory-white glassmorphic cards, deep slate navy typography (`#0f172a`), jewel-tone accents (crimson, electric indigo, royal purple, emerald), warm amber accents, and parchment styling for lyrics.
+- Fully preserved dark mode as default or switchable anytime.
+- State persisted automatically in `localStorage.getItem('bollywood_theme')`.
+- Toggleable anywhere via header buttons or keyboard shortcut <kbd>T</kbd>.
+
+### 2. Distant Viewing & TV / Projector Mode
+- **Automatic Big-Screen Breakpoints (`min-width: 860px`, `min-width: 1280px`)**:
+  - Expanded game content container width from narrow `500px` to widescreen `840px - 1040px`.
+  - Scaled up font sizes across all games:
+    - **Emojis**: `clamp(84px, 9vw, 125px)` (up to 125px wide!).
+    - **English Lyrics**: `clamp(22px, 2.6vw, 34px)` with high-contrast text and 1.7 line height.
+    - **Dialogues**: `clamp(26px, 3.2vw, 42px)` with prominent dashed blank boxes `? ? ? ?`.
+    - **Still Photos**: Full 16:9 widescreen frame up to `1000px` width.
+    - **Song Reveal Titles**: Scaled up to `28px - 36px` without truncation.
+    - **Clues**: Bold 17px–20px hint pills.
+- **Explicit TV / Projector Mode (`.tv-mode`)**:
+  - Dedicated toggle button in the header or via keyboard shortcut <kbd>B</kbd>.
+  - Scales all text, buttons, timer gauges, vinyl records, and celebration banners by an additional 25–35%.
+  - Enhances contrast and shadows specifically for living room projectors and 55"+ TVs viewed from 10–20 feet away.
+  - State persisted in `localStorage.getItem('bollywood_tv_mode')`.
+
+---
+
 ## 🧪 Verification & Validation
 
 1. **Syntax & Compilation**:
@@ -72,12 +99,8 @@ All original music quiz features (audio auto-pause/sing-along, vinyl visualizer,
 2. **Dataset Integrity**:
    - Validated `stanza_data.json` (27 calibrated songs).
    - Validated `stills_data.json`, `emoji_data.json`, `lyrics_data.json`, `dialogue_data.json`.
-### 4. Automated End-to-End Chrome Browser Verification
-- Executed Chrome DevTools Protocol automation in real headless Google Chrome running against local server:
-  - **Sur Sartaaz (Intro Quiz)**: Verified initial fetch of `songs_data.json` (22 songs), Start screen launch, playback queue assembly, host peek drawer, and score tracking.
-  - **Antara Suno! (Stanza Quiz)**: Verified fetch of `stanza_data.json` (27 songs), middle verse auto-pause, and restart from `0.0s` on guess.
-  - **Scene Dekho!**: Verified 16:9 still visual, 3-tier progressive de-blur/sharpen mystery lens, clue drawer, and celebration card.
-  - **Emoji Dhamaka!**: Verified banner cards, progressive clues, and reveal card.
-  - **Angrezi Babu**: Verified parchment cards, TTS read-aloud trigger, and original song details reveal.
-  - **Dialogue Baazi**: Verified quote box, blank placeholder `? ? ? ?`, hint levels, and punchline reveal.
-- **Zero console errors**: 100% clean runtime across all 6 games.
+3. **Automated End-to-End Chrome Browser Verification**:
+   - Automated CDP test suite in real headless Google Chrome verified:
+     - Theme Toggle (<kbd>T</kbd>) toggling light/dark and saving preference.
+     - TV Mode Toggle (<kbd>B</kbd>) toggling big-screen scaling and saving preference.
+     - All 6 games running under Light Theme and TV Mode with 0 console errors.

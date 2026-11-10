@@ -266,6 +266,69 @@ window.stopMusicForParty = function() {
 
 window.initParticles = createParticles;
 
+// ---- Theme & Display Settings Controller ----
+function applyTheme(theme) {
+    const isLight = theme === 'light';
+    if (isLight) {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    try {
+        localStorage.setItem('bollywood_theme', theme);
+    } catch (e) {}
+
+    const hubIcon = $('hubThemeIcon');
+    const hubLabel = $('hubThemeLabel');
+    if (hubIcon) hubIcon.textContent = isLight ? '🌙' : '☀️';
+    if (hubLabel) hubLabel.textContent = isLight ? 'Dark Theme' : 'Light Theme';
+
+    document.querySelectorAll('.btn-theme-toggle').forEach(btn => {
+        btn.textContent = isLight ? '🌙' : '☀️';
+        btn.setAttribute('title', isLight ? 'Switch to Dark Theme (T)' : 'Switch to Light Theme (T)');
+    });
+}
+
+window.toggleTheme = function () {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    applyTheme(isLight ? 'dark' : 'light');
+    triggerHaptic('tap');
+};
+
+function applyTvMode(active) {
+    document.documentElement.classList.toggle('tv-mode', active);
+    try {
+        localStorage.setItem('bollywood_tv_mode', active ? 'true' : 'false');
+    } catch (e) {}
+
+    const hubTv = $('hubTvToggle');
+    if (hubTv) hubTv.classList.toggle('active-mode-btn', active);
+
+    document.querySelectorAll('.btn-tv-toggle').forEach(btn => {
+        btn.classList.toggle('active-mode-btn', active);
+        btn.setAttribute('title', active ? 'Exit TV Mode (B)' : 'Enable TV / Big Screen Mode (B)');
+    });
+
+    resizeVisualizerCanvas();
+}
+
+window.toggleTvMode = function () {
+    const isTv = document.documentElement.classList.contains('tv-mode');
+    applyTvMode(!isTv);
+    triggerHaptic('tap');
+};
+
+function initThemeAndDisplayMode() {
+    let savedTheme = 'dark';
+    let savedTv = false;
+    try {
+        savedTheme = localStorage.getItem('bollywood_theme') || 'dark';
+        savedTv = localStorage.getItem('bollywood_tv_mode') === 'true';
+    } catch (e) {}
+    applyTheme(savedTheme);
+    applyTvMode(savedTv);
+}
+
 // ---- Action Dock Phase Switcher ----
 function setDockPhase(phaseId) {
     ['dockPlaying', 'dockGuessing', 'dockCelebrating'].forEach(id => {
@@ -895,14 +958,17 @@ function startVisualizer() {
             const barHeight = (dataArray[i] / 255) * height * 0.75;
             const gradient = ctx.createLinearGradient(0, height, 0, height - barHeight);
 
+            const isLightMode = document.documentElement.getAttribute('data-theme') === 'light';
             if (gameState.phase === 'celebrating') {
                 const hue = (i / barCount) * 40 + 140;
-                gradient.addColorStop(0, `hsla(${hue}, 70%, 55%, 0.8)`);
-                gradient.addColorStop(1, `hsla(${hue}, 70%, 65%, 0.2)`);
+                const lightness = isLightMode ? '42%' : '55%';
+                gradient.addColorStop(0, `hsla(${hue}, 85%, ${lightness}, 0.9)`);
+                gradient.addColorStop(1, `hsla(${hue}, 80%, 65%, 0.2)`);
             } else {
                 const hue = (i / barCount) * 60 + 300;
-                gradient.addColorStop(0, `hsla(${hue}, 80%, 60%, 0.8)`);
-                gradient.addColorStop(1, `hsla(${hue}, 80%, 70%, 0.2)`);
+                const lightness = isLightMode ? '46%' : '60%';
+                gradient.addColorStop(0, `hsla(${hue}, 90%, ${lightness}, 0.9)`);
+                gradient.addColorStop(1, `hsla(${hue}, 85%, 70%, 0.2)`);
             }
 
             ctx.fillStyle = gradient;
@@ -1035,6 +1101,18 @@ function launchConfetti() {
 document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
 
+    // Global Display Shortcuts
+    if (key === 't') {
+        e.preventDefault();
+        window.toggleTheme();
+        return;
+    }
+    if (key === 'b') {
+        e.preventDefault();
+        window.toggleTvMode();
+        return;
+    }
+
     // Start screen
     if (startScreen.classList.contains('active')) {
         if (key === 'enter' || key === ' ') {
@@ -1128,6 +1206,7 @@ window.addEventListener('resize', () => {
 });
 
 // ---- Initialize ----
+initThemeAndDisplayMode();
 createParticles();
 loadSongsData();
 
