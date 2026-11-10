@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="grad_2051" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050c18"/>
+      <stop offset="50%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#050c18"/>
+    </linearGradient>
+    <radialGradient id="spot_2051" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#050c18" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" fill="url(#grad_2051)"/>
+  <circle cx="640" cy="360" r="420" fill="url(#spot_2051)"/>
+
+  <!-- Film Perforations Top -->
+  <rect x="0" y="0" width="1280" height="40" fill="#050508"/>
+  <rect x="15" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="75" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="135" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="195" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="255" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="315" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="375" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="435" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="495" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="555" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="615" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="675" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="735" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="795" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="855" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="915" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="975" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="1035" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="1095" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="1155" y="10" width="30" height="20" rx="4" fill="#222230"/><rect x="1215" y="10" width="30" height="20" rx="4" fill="#222230"/>
+  
+  <!-- Film Perforations Bottom -->
+  <rect x="0" y="680" width="1280" height="40" fill="#050508"/>
+  <rect x="15" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="75" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="135" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="195" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="255" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="315" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="375" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="435" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="495" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="555" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="615" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="675" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="735" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="795" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="855" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="915" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="975" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="1035" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="1095" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="1155" y="690" width="30" height="20" rx="4" fill="#222230"/><rect x="1215" y="690" width="30" height="20" rx="4" fill="#222230"/>
+
+  <!-- Cinematic Frame & Crosshairs -->
+  <rect x="60" y="70" width="1160" height="580" rx="16" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+  <path d="M60,110 L60,70 L100,70 M1180,70 L1220,70 L1220,110 M60,610 L60,650 L100,650 M1180,650 L1220,650 L1220,610" stroke="#93c5fd" stroke-width="4" fill="none"/>
+
+  <!-- Center Stage Visual -->
+  <g transform="translate(640, 310)">
+    <circle cx="0" cy="0" r="130" fill="rgba(0,0,0,0.45)" stroke="#93c5fd" stroke-width="3" stroke-dasharray="6 6"/>
+    <text x="0" y="28" font-size="96" text-anchor="middle" filter="url(#glow)">🕴️ 🔴 🚁</text>
+  </g>
+
+  <!-- Clapperboard Banner -->
+  <g transform="translate(640, 480)">
+    <rect x="-280" y="-22" width="560" height="44" rx="22" fill="rgba(0,0,0,0.65)" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="0" y="6" fill="#93c5fd" font-family="'Outfit', -apple-system, sans-serif" font-size="18" font-weight="700" letter-spacing="4" text-anchor="middle">🎬 BOLLYWOOD ICONIC STILL</text>
+  </g>
+
+  <!-- Scene Clue Title -->
+  <text x="640" y="555" fill="#ffffff" font-family="'Outfit', -apple-system, sans-serif" font-size="24" font-weight="600" text-anchor="middle" opacity="0.95">Skybridge Rooftop & Red Diary Pursuit</text>
+  <text x="640" y="595" fill="#94a3b8" font-family="'Outfit', -apple-system, sans-serif" font-size="16" font-weight="500" letter-spacing="2" text-anchor="middle">2006 • FARHAN AKHTAR</text>
+</svg>

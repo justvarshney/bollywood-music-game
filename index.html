@@ -39,9 +39,150 @@
     <!-- Animated background particles -->
     <div class="bg-particles" id="bgParticles"></div>
 
-    <!-- Start Screen -->
-    <div id="startScreen" class="screen active">
+    <!-- ============================================================
+         SCREEN 0: BOLLYWOOD PARTY ARCADE (GAME HUB)
+         ============================================================ -->
+    <div id="hubScreen" class="screen active">
+        <div class="hub-content-scroll">
+            <header class="hub-header">
+                <div class="hub-logo-glow"></div>
+                <div class="hub-badge">🎉 BOLLYWOOD PARTY ADDA</div>
+                <h1 class="hub-title">
+                    <span class="hub-title-line-1">Filmi Game</span>
+                    <span class="hub-title-line-2">Night</span>
+                </h1>
+                <p class="hub-tagline">पहचानो तो जानें! • 5 Thrilling Party Games in 1</p>
+            </header>
+
+            <!-- Games Grid -->
+            <div class="hub-games-grid">
+                <!-- Game 1: Sur Sartaaj (Music Quiz) -->
+                <div class="hub-card card-audio" onclick="openMusicGame()">
+                    <div class="hub-card-glow"></div>
+                    <div class="hub-card-header">
+                        <span class="card-badge badge-gold">⭐ ORIGINAL HIT</span>
+                        <span class="card-category">🎵 Audio</span>
+                    </div>
+                    <div class="hub-card-body">
+                        <div class="card-icon-wrap">
+                            <span class="card-icon">🎧</span>
+                        </div>
+                        <h2 class="card-title">Sur Sartaaj</h2>
+                        <p class="card-subtitle">90's Bollywood Song Intro Quiz</p>
+                        <p class="card-desc">Listen to the instrumental intro, guess before the lyrics begin, and resume for an epic sing-along!</p>
+                    </div>
+                    <div class="hub-card-footer">
+                        <button type="button" class="btn-card-launch">
+                            <span>🎶 Play Music Quiz</span>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game 2: Scene Dekho (Movie Still Quiz) -->
+                <div class="hub-card card-visual" onclick="selectPartyGame('still')">
+                    <div class="hub-card-glow"></div>
+                    <div class="hub-card-header">
+                        <span class="card-badge badge-new">🔥 NEW</span>
+                        <span class="card-category">🎬 Visual Mystery</span>
+                    </div>
+                    <div class="hub-card-body">
+                        <div class="card-icon-wrap">
+                            <span class="card-icon">🎬</span>
+                        </div>
+                        <h2 class="card-title">Scene Dekho!</h2>
+                        <p class="card-subtitle">Guess Movie from Still Photograph</p>
+                        <p class="card-desc">Identify the blockbuster film from an iconic freeze-frame. Sharpen through the mystery lens or use actor clues!</p>
+                    </div>
+                    <div class="hub-card-footer">
+                        <button type="button" class="btn-card-launch">
+                            <span>🎬 Play Scene Dekho</span>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game 3: Emoji Dhamaka -->
+                <div class="hub-card card-emoji" onclick="selectPartyGame('emoji')">
+                    <div class="hub-card-glow"></div>
+                    <div class="hub-card-header">
+                        <span class="card-badge badge-new">✨ NEW</span>
+                        <span class="card-category">🔤 Emojis</span>
+                    </div>
+                    <div class="hub-card-body">
+                        <div class="card-icon-wrap">
+                            <span class="card-icon">🔤</span>
+                        </div>
+                        <h2 class="card-title">Emoji Dhamaka!</h2>
+                        <p class="card-subtitle">Movie Emoji Riddles</p>
+                        <p class="card-desc">Decipher legendary movies encoded in 3-4 vivid emojis (e.g. 🚂👰🌾 = DDLJ). Guaranteed party shouting!</p>
+                    </div>
+                    <div class="hub-card-footer">
+                        <button type="button" class="btn-card-launch">
+                            <span>🔤 Play Emoji Dhamaka</span>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game 4: Angrezi Babu, Desi Gaana -->
+                <div class="hub-card card-lyrics" onclick="selectPartyGame('lyrics')">
+                    <div class="hub-card-glow"></div>
+                    <div class="hub-card-header">
+                        <span class="card-badge badge-new">😂 NEW</span>
+                        <span class="card-category">🇬🇧 Laugh Out Loud</span>
+                    </div>
+                    <div class="hub-card-body">
+                        <div class="card-icon-wrap">
+                            <span class="card-icon">🇬🇧</span>
+                        </div>
+                        <h2 class="card-title">Angrezi Babu</h2>
+                        <p class="card-subtitle">Literal English Lyrics to Hindi Song</p>
+                        <p class="card-desc">Famous songs translated literally word-for-word into English! Tap to hear the funny voice recite the verse!</p>
+                    </div>
+                    <div class="hub-card-footer">
+                        <button type="button" class="btn-card-launch">
+                            <span>🇬🇧 Play Angrezi Babu</span>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game 5: Dialogue Baazi -->
+                <div class="hub-card card-dialogue" onclick="selectPartyGame('dialogue')">
+                    <div class="hub-card-glow"></div>
+                    <div class="hub-card-header">
+                        <span class="card-badge badge-new">💥 NEW</span>
+                        <span class="card-category">🗣️ Filmi Quotes</span>
+                    </div>
+                    <div class="hub-card-body">
+                        <div class="card-icon-wrap">
+                            <span class="card-icon">🗣️</span>
+                        </div>
+                        <h2 class="card-title">Dialogue Baazi!</h2>
+                        <p class="card-subtitle">Complete Iconic Punchlines</p>
+                        <p class="card-desc">"Mogambo _____ hua!" Fill in the missing word of Bollywood's most celebrated punchlines and claim the crown!</p>
+                    </div>
+                    <div class="hub-card-footer">
+                        <button type="button" class="btn-card-launch">
+                            <span>🗣️ Play Dialogue Baazi</span>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Screen: Sur Sartaaj (Music Quiz) -->
+    <div id="startScreen" class="screen">
         <div class="start-content-scroll">
+            <div class="start-header-nav">
+                <button type="button" class="btn-back-hub" onclick="openGameHub()" title="Return to All Games Hub">
+                    ← 🏠 All Games Hub
+                </button>
+            </div>
+
             <div class="logo-container">
                 <div class="logo-glow"></div>
                 <div class="logo-icon">🎬</div>
@@ -309,6 +450,191 @@
                         <span class="btn-text">🔄 Play Again</span>
                         <span class="btn-glow"></span>
                     </button>
+                    <button class="btn-start btn-secondary-hub" onclick="openGameHub()">
+                        <span class="btn-text">🎮 All Games Hub</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         SCREEN 3: PARTY START SCREEN (Config for Stills, Emojis, Lyrics, Dialogues)
+         ============================================================ -->
+    <div id="partyStartScreen" class="screen">
+        <div class="start-content-scroll">
+            <div class="start-header-nav">
+                <button type="button" class="btn-back-hub" onclick="openGameHub()" title="Return to All Games Hub">
+                    ← 🏠 All Games Hub
+                </button>
+            </div>
+
+            <div class="logo-container">
+                <div class="logo-glow"></div>
+                <div class="party-badge-chip" id="partyStartBadge">Visual Mystery</div>
+                <div class="logo-icon" id="partyStartIcon">🎬</div>
+                <h1 class="party-game-title" id="partyStartTitle">Scene Dekho!</h1>
+                <p class="tagline" id="partyStartSubtitle">Guess the movie from the iconic still photograph</p>
+            </div>
+
+            <!-- Questions Count Selection Pills -->
+            <div class="song-count-section">
+                <label class="section-label">How many rounds to play?</label>
+                <div class="pill-group" id="partyCountPills">
+                    <button type="button" class="count-pill" data-count="5">5</button>
+                    <button type="button" class="count-pill active" data-count="10">10</button>
+                    <button type="button" class="count-pill" data-count="15">15</button>
+                    <button type="button" class="count-pill" data-count="20">20</button>
+                    <button type="button" class="count-pill" data-count="all">All</button>
+                </div>
+            </div>
+
+            <!-- Specific Option: Still Photo Mystery Lens Toggle -->
+            <div class="party-option-section" id="partyStillOptions">
+                <label class="toggle-control">
+                    <input type="checkbox" id="toggleInstantCrisp">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text">Instant Crisp Photo (Skip mystery blur &amp; zoom)</span>
+                </label>
+            </div>
+
+            <!-- Specific Option: Lyrics Recite Tip -->
+            <div class="party-option-section hidden" id="partyLyricsOptions">
+                <div class="info-card info-card-compact">
+                    <span class="info-icon">🔊</span>
+                    <span class="info-text">Supports <strong>Voice Aloud</strong> recitation during the game!</span>
+                </div>
+            </div>
+
+            <div class="start-cta">
+                <button id="btnStartParty" class="btn-start" onclick="startPartyGame()">
+                    <span class="btn-text">🚀 Start Game</span>
+                    <span class="btn-glow"></span>
+                </button>
+                <p class="start-hint">Tap to start &nbsp;•&nbsp; or press <kbd>Enter</kbd></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         SCREEN 4: PARTY GAME SCREEN
+         ============================================================ -->
+    <div id="partyGameScreen" class="screen">
+        <!-- Top Bar: Progress & Stats -->
+        <header class="game-header">
+            <div class="progress-container">
+                <div class="progress-bar" id="partyProgressBar"></div>
+            </div>
+            
+            <div class="header-nav">
+                <button class="btn-icon-nav" id="btnPartyHome" onclick="confirmExitPartyGame()" title="Back to All Games" aria-label="Exit Game">
+                    ✕
+                </button>
+                <div class="header-progress" id="partyProgressText">🎬 1 / 10</div>
+                <div class="score-display">
+                    <div class="score-pill">
+                        <span class="score-label">Score</span>
+                        <span class="score-value" id="partyScoreValue">0</span>
+                    </div>
+                    <div class="score-pill streak-pill">
+                        <span class="score-value" id="partyStreakValue">0 🔥</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Party Game Area -->
+        <main class="party-main">
+            <!-- Dynamic Question Stage Area -->
+            <div class="party-stage-area" id="partyStageArea">
+                <!-- Injected dynamically by party_games.js -->
+            </div>
+
+            <!-- Host Peek Drawer -->
+            <div class="host-peek-box">
+                <button type="button" class="btn-peek" id="btnPartyPeek" onclick="togglePartyPeek()">
+                    <span class="peek-icon">👁️</span>
+                    <span class="peek-label" id="partyPeekLabel">Peek Answer (Host)</span>
+                    <kbd class="kbd-badge-peek">P</kbd>
+                </button>
+                <div class="peek-result hidden" id="partyPeekResult">
+                    Answer Title
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Action Dock (Thumb Zone) -->
+        <footer class="action-dock party-action-dock" id="partyActionDock">
+            <!-- Active Phase -->
+            <div class="dock-phase active" id="partyDockActive">
+                <button type="button" class="btn-action btn-action-hero btn-hero-correct" id="btnPartyGuessed" onclick="markPartyCorrect()">
+                    <span class="btn-icon">✅</span>
+                    <span class="btn-label">Someone Guessed It!</span>
+                    <kbd class="kbd-badge">Y</kbd>
+                </button>
+                <div class="dock-sub-row">
+                    <button type="button" class="btn-action btn-action-secondary" id="btnPartySkip" onclick="skipPartyQuestion()">
+                        <span class="btn-icon">⏭</span>
+                        <span class="btn-label">Skip Question</span>
+                        <kbd class="kbd-badge">Space</kbd>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Revealed / Celebration Phase -->
+            <div class="dock-phase" id="partyDockRevealed">
+                <button type="button" class="btn-action btn-action-hero btn-hero-next" id="btnPartyNext" onclick="nextPartyQuestion()">
+                    <span class="btn-label">Next Question</span>
+                    <span class="btn-icon">⏭</span>
+                    <kbd class="kbd-badge">Space</kbd>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ============================================================
+         SCREEN 5: PARTY RESULTS SCREEN
+         ============================================================ -->
+    <div id="partyResultsScreen" class="screen">
+        <div class="results-scroll">
+            <div class="results-container">
+                <div class="results-header">
+                    <div class="trophy">🏆</div>
+                    <h2>Round Complete!</h2>
+                    <p class="results-subtitle">Here is how the party game went</p>
+                </div>
+
+                <div class="results-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="partyFinalScore">0</div>
+                        <div class="stat-label">Correct Guesses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="partyTotalQuestions">10</div>
+                        <div class="stat-label">Total Rounds</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="partyBestStreak">0</div>
+                        <div class="stat-label">Best Streak 🔥</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="partyAccuracy">0%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+
+                <div class="results-grade" id="partyResultsGrade"></div>
+
+                <div class="results-actions">
+                    <button class="btn-start" onclick="replayCurrentPartyGame()">
+                        <span class="btn-text">🔄 Play Again</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                    <button class="btn-start btn-secondary-hub" onclick="openGameHub()">
+                        <span class="btn-text">🎮 All Games Hub</span>
+                        <span class="btn-glow"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -317,6 +643,7 @@
     <!-- Confetti canvas -->
     <canvas id="confettiCanvas"></canvas>
 
-    <script src="game.js?v=2.1"></script>
+    <script src="game.js?v=3.0"></script>
+    <script src="party_games.js?v=3.0"></script>
 </body>
 </html>

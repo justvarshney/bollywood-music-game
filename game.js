@@ -193,9 +193,17 @@ function createParticles() {
 
 // ---- Screen Transitions ----
 function showScreen(screen) {
-    [startScreen, gameScreen, resultsScreen].forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     screen.classList.add('active');
 }
+
+// Global hook to safely halt music playback when user enters other games
+window.stopMusicForParty = function() {
+    gameState.phase = 'idle';
+    cleanupAudio();
+};
+
+window.initParticles = initParticles;
 
 // ---- Action Dock Phase Switcher ----
 function setDockPhase(phaseId) {
@@ -258,8 +266,11 @@ function resetGame() {
 // ---- Exit Game Confirmation ----
 function confirmExitGame() {
     triggerHaptic('tap');
-    if (confirm('Exit quiz and return to home screen?')) {
+    if (confirm('Exit quiz and return to Bollywood Party Hub?')) {
         resetGame();
+        if (typeof window.openGameHub === 'function') {
+            window.openGameHub();
+        }
     }
 }
 
