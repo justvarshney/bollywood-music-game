@@ -1354,6 +1354,7 @@ kbd {
 
 /* Card Themes */
 .card-audio .hub-card-glow { background: var(--accent-1); }
+.card-stanza .hub-card-glow { background: #38bdf8; }
 .card-visual .hub-card-glow { background: var(--accent-4); }
 .card-emoji .hub-card-glow { background: var(--gold); }
 .card-lyrics .hub-card-glow { background: var(--accent-2); }
@@ -1379,6 +1380,12 @@ kbd {
     background: rgba(255, 215, 0, 0.15);
     color: var(--gold);
     border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.badge-trend {
+    background: rgba(244, 63, 94, 0.18);
+    color: #fb7185;
+    border: 1px solid rgba(244, 63, 94, 0.4);
 }
 
 .badge-new {

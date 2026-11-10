@@ -57,11 +57,11 @@
             <!-- Games Grid -->
             <div class="hub-games-grid">
                 <!-- Game 1: Sur Sartaaj (Music Quiz) -->
-                <div class="hub-card card-audio" onclick="openMusicGame()">
+                <div class="hub-card card-audio" onclick="openMusicGame('intro')">
                     <div class="hub-card-glow"></div>
                     <div class="hub-card-header">
                         <span class="card-badge badge-gold">⭐ ORIGINAL HIT</span>
-                        <span class="card-category">🎵 Audio</span>
+                        <span class="card-category">🎵 Audio Intro</span>
                     </div>
                     <div class="hub-card-body">
                         <div class="card-icon-wrap">
@@ -73,7 +73,30 @@
                     </div>
                     <div class="hub-card-footer">
                         <button type="button" class="btn-card-launch">
-                            <span>🎶 Play Music Quiz</span>
+                            <span>🎶 Play Intro Quiz</span>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game 2: Antara Suno, Mukhda Pehchano (Stanza Challenge) -->
+                <div class="hub-card card-stanza" onclick="openMusicGame('stanza')">
+                    <div class="hub-card-glow"></div>
+                    <div class="hub-card-header">
+                        <span class="card-badge badge-trend">🔥 YOUTUBE TREND</span>
+                        <span class="card-category">🎙️ Stanza Challenge</span>
+                    </div>
+                    <div class="hub-card-body">
+                        <div class="card-icon-wrap">
+                            <span class="card-icon">🎙️</span>
+                        </div>
+                        <h2 class="card-title">Antara Suno!</h2>
+                        <p class="card-subtitle">Mukhda Pehchano (Stanza Quiz)</p>
+                        <p class="card-desc">Listen to the middle verse (Antara). Can your friends identify the song? On correct guess, it plays triumphantly from the very beginning!</p>
+                    </div>
+                    <div class="hub-card-footer">
+                        <button type="button" class="btn-card-launch">
+                            <span>🎙️ Play Antara Quiz</span>
                             <span class="arrow-icon">→</span>
                         </button>
                     </div>
@@ -185,27 +208,27 @@
 
             <div class="logo-container">
                 <div class="logo-glow"></div>
-                <div class="logo-icon">🎬</div>
+                <div class="logo-icon" id="gameStartLogoIcon">🎬</div>
                 <h1 class="game-title">
-                    <span class="title-line-1">Bollywood</span>
-                    <span class="title-line-2">Dinchak</span>
-                    <span class="title-line-3">Music Quiz</span>
+                    <span class="title-line-1" id="gameStartTitleLine1">Bollywood</span>
+                    <span class="title-line-2" id="gameStartTitleLine2">Dinchak</span>
+                    <span class="title-line-3" id="gameStartTitleLine3">Music Quiz</span>
                 </h1>
-                <p class="tagline">पहचानो तो जानें! &nbsp;•&nbsp; Guess the Song!</p>
+                <p class="tagline" id="gameStartTagline">पहचानो तो जानें! &nbsp;•&nbsp; Guess the Song!</p>
             </div>
 
             <div class="start-info">
                 <div class="info-card">
-                    <div class="info-icon">🎧</div>
-                    <div class="info-text">Listen to <strong>intro music</strong></div>
+                    <div class="info-icon" id="infoCard1Icon">🎧</div>
+                    <div class="info-text" id="infoCard1Text">Listen to <strong>intro music</strong></div>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon">🤔</div>
-                    <div class="info-text">Guess before <strong>lyrics start</strong></div>
+                    <div class="info-icon" id="infoCard2Icon">🤔</div>
+                    <div class="info-text" id="infoCard2Text">Guess before <strong>lyrics start</strong></div>
                 </div>
                 <div class="info-card">
-                    <div class="info-icon">🎉</div>
-                    <div class="info-text">Sing along on <strong>correct guess!</strong></div>
+                    <div class="info-icon" id="infoCard3Icon">🎉</div>
+                    <div class="info-text" id="infoCard3Text">Sing along on <strong>correct guess!</strong></div>
                 </div>
             </div>
 
@@ -309,7 +332,7 @@
                 <div class="state-guessing hidden" id="stateGuessing">
                     <div class="guess-prompt">
                         <span class="guess-emoji">🤔</span>
-                        <span class="guess-title">Can you name this song?</span>
+                        <span class="guess-title" id="guessPromptTitle">Can you name this song?</span>
                     </div>
                     
                     <!-- Host Peek Answer Drawer -->
@@ -328,7 +351,7 @@
                 <div class="state-celebrating hidden" id="stateCelebrating">
                     <div class="celebrating-prompt">
                         <span class="celebrating-emoji">🎉</span>
-                        <span class="celebrating-text">Correct! Sing along!</span>
+                        <span class="celebrating-text" id="celebratingText">Correct! Sing along!</span>
                     </div>
                     <div class="revealed-song-card" id="revealedSongCard">
                         <div class="equalizer eq-small">

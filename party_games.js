@@ -100,10 +100,12 @@
         triggerParticles();
     };
 
-    // Expose openMusicGame globally (returns to original music game start screen)
-    window.openMusicGame = function () {
-        showAppScreen('startScreen');
-    };
+    // Expose openMusicGame globally if not provided by game.js
+    if (!window.openMusicGame) {
+        window.openMusicGame = function (mode = 'intro') {
+            showAppScreen('startScreen');
+        };
+    }
 
     // ---- Launch Party Game Config Screen ----
     window.selectPartyGame = function (mode) {

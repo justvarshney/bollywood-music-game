@@ -12,11 +12,14 @@
 
 // ---- Configuration ----
 const SONGS_DATA_URL = 'songs_data.json';
+const STANZA_DATA_URL = 'stanza_data.json';
 
 // ---- State ----
 let allSongsData = [];
+let allStanzaData = [];
 
 let gameState = {
+    gameMode: 'intro', // 'intro' (Sur Sartaaj) | 'stanza' (Antara Suno, Mukhda Pehchano)
     currentSongIndex: 0,
     totalSongs: 10,
     score: 0,
@@ -106,34 +109,91 @@ function ensureAudioUnlocked() {
     }, { passive: true });
 });
 
-// ---- Load Songs Data ----
+// ---- Active Audio Dataset Helper ----
+function getActiveAudioDataset() {
+    return gameState.gameMode === 'stanza' ? allStanzaData : allSongsData;
+}
+
+// ---- Load Songs & Stanza Data ----
 async function loadSongsData() {
     try {
         const resp = await fetch(SONGS_DATA_URL);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        allSongsData = await resp.json();
-        console.log(`✅ Loaded ${allSongsData.length} songs from songs_data.json`);
-        updateSongCountOptions();
-        $('startBtn').disabled = false;
-        $('startBtn').querySelector('.btn-text').textContent = '🎶 Start Quiz';
+        if (resp.ok) {
+            allSongsData = await resp.json();
+            console.log(`✅ Loaded ${allSongsData.length} songs from songs_data.json`);
+        }
     } catch (e) {
         console.error('Failed to load songs_data.json:', e);
-        $('startBtn').querySelector('.btn-text').textContent = '⚠️ No Songs Found';
-        $('startBtn').disabled = true;
-        const hint = document.createElement('p');
-        hint.className = 'start-hint';
-        hint.style.color = '#ff6b9d';
-        hint.innerHTML = 'Run <kbd>python3 prepare.py</kbd> first to prepare songs';
-        $('startBtn').parentNode.insertBefore(hint, $('startBtn').nextSibling);
     }
+
+    try {
+        const respStanza = await fetch(STANZA_DATA_URL);
+        if (respStanza.ok) {
+            allStanzaData = await respStanza.json();
+            console.log(`✅ Loaded ${allStanzaData.length} songs from stanza_data.json`);
+        }
+    } catch (e) {
+        console.warn('Note: stanza_data.json not loaded yet:', e);
+    }
+
+    updateStartScreenMode(gameState.gameMode || 'intro');
 }
+
+// ---- Switch Mode UI for Start Screen ----
+function updateStartScreenMode(mode = 'intro') {
+    gameState.gameMode = mode;
+    const isStanza = mode === 'stanza';
+    const activeData = getActiveAudioDataset();
+
+    const title1 = $('gameStartTitleLine1');
+    const title2 = $('gameStartTitleLine2');
+    const title3 = $('gameStartTitleLine3');
+    const tagline = $('gameStartTagline');
+    const logoIcon = $('gameStartLogoIcon');
+
+    if (title1) title1.textContent = isStanza ? 'Antara' : 'Bollywood';
+    if (title2) title2.textContent = isStanza ? 'Suno, Mukhda' : 'Dinchak';
+    if (title3) title3.textContent = isStanza ? 'Pehchano!' : 'Music Quiz';
+    if (tagline) tagline.textContent = isStanza ? 'पहचानो तो जानें! • Guess Song from Stanza!' : 'पहचानो तो जानें! • Guess the Song!';
+    if (logoIcon) logoIcon.textContent = isStanza ? '🎙️' : '🎬';
+
+    const c1 = $('infoCard1Text');
+    const c2 = $('infoCard2Text');
+    const c3 = $('infoCard3Text');
+    if (c1) c1.innerHTML = isStanza ? 'Listen to <strong>middle stanza (Antara)</strong>' : 'Listen to <strong>intro music</strong>';
+    if (c2) c2.innerHTML = isStanza ? 'Guess the <strong>main song hook (Mukhda)</strong>' : 'Guess before <strong>lyrics start</strong>';
+    if (c3) c3.innerHTML = isStanza ? 'Plays from <strong>start for sing-along!</strong>' : 'Sing along on <strong>correct guess!</strong>';
+
+    const startBtn = $('startBtn');
+    if (startBtn) {
+        if (activeData.length > 0) {
+            startBtn.disabled = false;
+            startBtn.querySelector('.btn-text').textContent = isStanza ? '🎙️ Start Antara Quiz' : '🎶 Start Intro Quiz';
+        } else {
+            startBtn.disabled = true;
+            startBtn.querySelector('.btn-text').textContent = isStanza ? '⚠️ No Stanzas Found' : '⚠️ No Songs Found';
+        }
+    }
+
+    updateSongCountOptions();
+}
+
+// Expose openMusicGame globally with mode selection
+window.openMusicGame = function (mode = 'intro') {
+    updateStartScreenMode(mode);
+    showScreen(startScreen);
+};
 
 // ---- Song Count Pills & Selector ----
 function updateSongCountOptions() {
-    const total = allSongsData.length;
+    const activeData = getActiveAudioDataset();
+    const total = activeData.length;
     const select = $('songCount');
+    if (!select) return;
     select.innerHTML = '';
     
+    if (total === 0) return;
+
     const countOptions = [5, 10, 20, 30].filter(n => n < total);
     if (!countOptions.includes(total)) countOptions.push(total);
 
@@ -147,6 +207,7 @@ function updateSongCountOptions() {
 
     // Setup pill buttons
     const pillsContainer = $('songCountPills');
+    if (!pillsContainer) return;
     pillsContainer.innerHTML = '';
 
     const pillValues = [5, 10, 20, 30].filter(n => n <= total);
@@ -164,7 +225,7 @@ function updateSongCountOptions() {
 
         btn.addEventListener('click', () => {
             triggerHaptic('tap');
-            document.querySelectorAll('.count-pill').forEach(p => p.classList.remove('active'));
+            pillsContainer.querySelectorAll('.count-pill').forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
             select.value = val === 'all' ? total : val;
         });
@@ -231,20 +292,21 @@ function shuffleArray(arr) {
 
 // ---- Start Game ----
 function startGame() {
-    if (allSongsData.length === 0) return;
+    const activeData = getActiveAudioDataset();
+    if (activeData.length === 0) return;
     triggerHaptic('tap');
 
     ensureAudioUnlocked();
 
     const count = parseInt($('songCount').value) || 10;
-    gameState.totalSongs = Math.min(count, allSongsData.length);
+    gameState.totalSongs = Math.min(count, activeData.length);
     gameState.currentSongIndex = 0;
     gameState.score = 0;
     gameState.streak = 0;
     gameState.bestStreak = 0;
     gameState.phase = 'idle';
 
-    const allIndices = Array.from({ length: allSongsData.length }, (_, i) => i);
+    const allIndices = Array.from({ length: activeData.length }, (_, i) => i);
     gameState.songOrder = shuffleArray(allIndices).slice(0, gameState.totalSongs);
 
     showScreen(gameScreen);
@@ -260,6 +322,7 @@ function resetGame() {
     triggerHaptic('tap');
     gameState.phase = 'idle';
     cleanupAudio();
+    updateStartScreenMode(gameState.gameMode || 'intro');
     showScreen(startScreen);
 }
 
@@ -275,10 +338,10 @@ function confirmExitGame() {
 }
 
 // ======================================================
-// CORE GAME FLOW
+// CORE GAME FLOW (INTRO & STANZA SUPPORT)
 // ======================================================
 
-// ---- Play Song: Load full song, play from start, auto-pause at intro end ----
+// ---- Play Song: Load full song, play clip (intro or stanza), auto-pause at boundary ----
 function playSong() {
     if (gameState.currentSongIndex >= gameState.totalSongs) {
         showResults();
@@ -290,18 +353,26 @@ function playSong() {
 
     gameState.phase = 'playing';
 
-    // Get song data
+    // Get song data from active dataset
+    const activeData = getActiveAudioDataset();
     const dataIndex = gameState.songOrder[gameState.currentSongIndex];
-    const songData = allSongsData[dataIndex];
+    const songData = activeData[dataIndex];
     gameState.currentSongData = songData;
 
-    const introDuration = songData.introDuration;
+    const isStanza = gameState.gameMode === 'stanza';
+    const clipStart = isStanza ? (songData.stanzaStart || 0) : 0;
+    const clipEnd = isStanza ? (songData.stanzaEnd || (clipStart + 18)) : songData.introDuration;
+    const clipDuration = Math.max(1, clipEnd - clipStart);
 
     // Reset UI & Host Peek
     $('statePlaying').classList.remove('hidden');
     $('stateGuessing').classList.add('hidden');
     $('stateCelebrating').classList.add('hidden');
-    $('listeningText').textContent = `🎵 Listening... (${introDuration}s)`;
+
+    $('listeningText').textContent = isStanza
+        ? `🎙️ Listening to Antara... (${Math.round(clipDuration)}s)`
+        : `🎵 Listening to Intro... (${Math.round(clipDuration)}s)`;
+
     $('vinylTapHint').textContent = 'Tap to Pause';
     $('btnPausePlayingText').textContent = 'Pause';
     $('btnPausePlayingIcon').textContent = '⏸';
@@ -314,8 +385,8 @@ function playSong() {
     $('vinylRecord').classList.add('spinning');
 
     // Timer setup
-    gameState.timeRemaining = introDuration;
-    updateTimerDisplay(introDuration);
+    gameState.timeRemaining = clipDuration;
+    updateTimerDisplay(clipDuration);
     $('timerContainer').style.opacity = '1';
 
     ensureAudioUnlocked();
@@ -326,12 +397,27 @@ function playSong() {
     const songSrc = encodeURI(songData.fullFile);
     audio.src = songSrc;
 
+    // If stanza mode, seek to stanzaStart on metadata or immediately
+    if (clipStart > 0) {
+        const seekHandler = () => {
+            try { audio.currentTime = clipStart; } catch (e) {}
+            audio.removeEventListener('loadedmetadata', seekHandler);
+            audio.removeEventListener('canplay', seekHandler);
+        };
+        audio.addEventListener('loadedmetadata', seekHandler, { once: true });
+        audio.addEventListener('canplay', seekHandler, { once: true });
+        try { audio.currentTime = clipStart; } catch (e) {}
+    }
+
     // Start playback
     const playPromise = audio.play();
     if (playPromise !== undefined) {
         playPromise.then(() => {
             if (gameState.audioContext && gameState.audioContext.state === 'suspended') {
                 gameState.audioContext.resume().catch(() => {});
+            }
+            if (clipStart > 0 && Math.abs(audio.currentTime - clipStart) > 1.5) {
+                try { audio.currentTime = clipStart; } catch (e) {}
             }
             startVisualizer();
         }).catch(e => {
@@ -340,18 +426,20 @@ function playSong() {
     }
 
     // Update MediaSession
-    updateMediaSession("🎵 Bollywood 90's Quiz", `Song #${gameState.currentSongIndex + 1} Intro`);
+    const mediaSessionTitle = isStanza ? "🎙️ Antara Suno, Mukhda Pehchano" : "🎵 Bollywood 90's Quiz";
+    updateMediaSession(mediaSessionTitle, `Song #${gameState.currentSongIndex + 1}`);
 
-    // Monitor playback — auto-pause at intro boundary
+    // Monitor playback — auto-pause at clip boundary
     gameState.timerInterval = setInterval(() => {
         if (!audio || audio.paused) return;
 
-        const elapsed = audio.currentTime;
-        gameState.timeRemaining = Math.max(0, introDuration - elapsed);
-        updateTimerDisplay(introDuration);
+        const currentPos = audio.currentTime;
+        const elapsedInClip = Math.max(0, currentPos - clipStart);
+        gameState.timeRemaining = Math.max(0, clipDuration - elapsedInClip);
+        updateTimerDisplay(clipDuration);
 
-        // Pause right at intro end
-        if (elapsed >= introDuration) {
+        // Pause right at boundary
+        if (currentPos >= clipEnd || elapsedInClip >= clipDuration) {
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = null;
             audio.pause();
@@ -360,7 +448,7 @@ function playSong() {
     }, 50);
 }
 
-// ---- Intro Finished → Pause for Guessing ----
+// ---- Clip Finished → Pause for Guessing ----
 function onIntroFinished() {
     gameState.phase = 'guessing';
 
@@ -368,13 +456,25 @@ function onIntroFinished() {
     $('vinylRecord').classList.remove('spinning');
     stopVisualizer();
 
+    const isStanza = gameState.gameMode === 'stanza';
+
     // Update UI
     $('statePlaying').classList.add('hidden');
     $('stateGuessing').classList.remove('hidden');
     $('stateCelebrating').classList.add('hidden');
     $('timerContainer').style.opacity = '0.35';
     $('timerText').textContent = '⏸';
-    $('vinylTapHint').textContent = 'Intro Paused';
+    $('vinylTapHint').textContent = isStanza ? 'Antara Paused' : 'Intro Paused';
+
+    const promptTitle = $('guessPromptTitle');
+    if (promptTitle) {
+        promptTitle.textContent = isStanza ? 'Can you name the Mukhda / Song?' : 'Can you name this song?';
+    }
+
+    const replayText = $('btnReplayText');
+    if (replayText) {
+        replayText.textContent = isStanza ? 'Replay Antara' : 'Replay Intro';
+    }
 
     setDockPhase('dockGuessing');
 
@@ -383,7 +483,7 @@ function onIntroFinished() {
     }
 }
 
-// ---- Replay Intro: Seek back to 0, play until intro end again ----
+// ---- Replay Clip: Seek back to start of clip and play until clip end ----
 function replayClip() {
     if (gameState.phase !== 'guessing') return;
     triggerHaptic('tap');
@@ -392,7 +492,12 @@ function replayClip() {
     const audio = gameState.currentAudio || gameState.sharedAudio;
     if (!audio) return;
 
-    const introDuration = gameState.currentSongData.introDuration;
+    const isStanza = gameState.gameMode === 'stanza';
+    const songData = gameState.currentSongData;
+    const clipStart = isStanza ? (songData.stanzaStart || 0) : 0;
+    const clipEnd = isStanza ? (songData.stanzaEnd || (clipStart + 18)) : songData.introDuration;
+    const clipDuration = Math.max(1, clipEnd - clipStart);
+
     gameState.phase = 'replaying';
 
     // Update UI
@@ -400,7 +505,9 @@ function replayClip() {
     $('statePlaying').classList.remove('hidden');
     $('stateGuessing').classList.add('hidden');
     $('stateCelebrating').classList.add('hidden');
-    $('listeningText').textContent = `🎵 Listening... (${introDuration}s)`;
+    $('listeningText').textContent = isStanza
+        ? `🎙️ Listening to Antara... (${Math.round(clipDuration)}s)`
+        : `🎵 Listening... (${Math.round(clipDuration)}s)`;
     $('vinylTapHint').textContent = 'Tap to Pause';
     $('btnPausePlayingText').textContent = 'Pause';
     $('btnPausePlayingIcon').textContent = '⏸';
@@ -408,12 +515,12 @@ function replayClip() {
     setDockPhase('dockPlaying');
 
     // Reset timer
-    gameState.timeRemaining = introDuration;
-    updateTimerDisplay(introDuration);
+    gameState.timeRemaining = clipDuration;
+    updateTimerDisplay(clipDuration);
     $('timerContainer').style.opacity = '1';
 
-    // Seek back to start and play
-    audio.currentTime = 0;
+    // Seek back to clip start and play
+    audio.currentTime = clipStart;
     const playPromise = audio.play();
     if (playPromise !== undefined) {
         playPromise.then(() => {
@@ -427,11 +534,12 @@ function replayClip() {
     gameState.timerInterval = setInterval(() => {
         if (!audio || audio.paused) return;
 
-        const elapsed = audio.currentTime;
-        gameState.timeRemaining = Math.max(0, introDuration - elapsed);
-        updateTimerDisplay(introDuration);
+        const currentPos = audio.currentTime;
+        const elapsedInClip = Math.max(0, currentPos - clipStart);
+        gameState.timeRemaining = Math.max(0, clipDuration - elapsedInClip);
+        updateTimerDisplay(clipDuration);
 
-        if (elapsed >= introDuration) {
+        if (currentPos >= clipEnd || elapsedInClip >= clipDuration) {
             clearInterval(gameState.timerInterval);
             gameState.timerInterval = null;
             audio.pause();
@@ -440,7 +548,7 @@ function replayClip() {
     }, 50);
 }
 
-// ---- Correct Guess → Resume playing lyrics & sing along ----
+// ---- Correct Guess → If Stanza, PLAY FROM START (0s)! If Intro, resume vocals! ----
 function markCorrect() {
     const validPhases = ['guessing', 'playing', 'replaying'];
     if (!validPhases.includes(gameState.phase)) return;
@@ -464,11 +572,24 @@ function markCorrect() {
     // Enter celebrating phase
     gameState.phase = 'celebrating';
 
+    const isStanza = gameState.gameMode === 'stanza';
+
     // Update UI
     $('statePlaying').classList.add('hidden');
     $('stateGuessing').classList.add('hidden');
     $('stateCelebrating').classList.remove('hidden');
     $('celebratingSongTitle').textContent = gameState.currentSongData.displayName;
+
+    const celebText = $('celebratingText');
+    if (celebText) {
+        celebText.textContent = isStanza ? 'Correct! Playing from the Beginning!' : 'Correct! Sing along!';
+    }
+
+    const replayFullText = $('btnReplayFullText');
+    if (replayFullText) {
+        replayFullText.textContent = isStanza ? 'Replay Song' : 'Replay Vocals';
+    }
+
     $('vinylRecord').classList.add('spinning');
     $('vinylTapHint').textContent = 'Tap to Pause';
     $('timerContainer').style.opacity = '0';
@@ -480,7 +601,10 @@ function markCorrect() {
     ensureAudioUnlocked();
     const audio = gameState.currentAudio || gameState.sharedAudio;
     if (audio) {
-        audio.currentTime = gameState.currentSongData.introDuration;
+        // IN STANZA MODE: PLAY FROM START (0.0s) AS REQUESTED BY USER!
+        // IN INTRO MODE: RESUME AT INTRO DURATION FOR VOCALS!
+        const resumePos = isStanza ? 0 : gameState.currentSongData.introDuration;
+        audio.currentTime = resumePos;
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
@@ -488,11 +612,11 @@ function markCorrect() {
                     gameState.audioContext.resume().catch(() => {});
                 }
                 startVisualizer();
-            }).catch(e => console.error('Vocals play failed:', e));
+            }).catch(e => console.error('Sing along play failed:', e));
         }
     }
 
-    updateMediaSession(gameState.currentSongData.displayName, 'Bollywood 90s Hit — Sing Along!');
+    updateMediaSession(gameState.currentSongData.displayName, 'Bollywood Hit — Sing Along!');
 }
 
 // ---- Replay Full Song Vocals in celebration phase ----
@@ -503,7 +627,8 @@ function replayFullSong() {
     ensureAudioUnlocked();
     const audio = gameState.currentAudio || gameState.sharedAudio;
     if (audio) {
-        audio.currentTime = gameState.currentSongData.introDuration;
+        const isStanza = gameState.gameMode === 'stanza';
+        audio.currentTime = isStanza ? 0 : gameState.currentSongData.introDuration;
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
@@ -511,7 +636,7 @@ function replayFullSong() {
                     gameState.audioContext.resume().catch(() => {});
                 }
                 startVisualizer();
-            }).catch(e => console.error('Replay vocals failed:', e));
+            }).catch(e => console.error('Replay failed:', e));
         }
         $('vinylRecord').classList.add('spinning');
         $('btnPauseCelebrateText').textContent = 'Pause';
