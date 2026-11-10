@@ -72,6 +72,12 @@ All original music quiz features (audio auto-pause/sing-along, vinyl visualizer,
 2. **Dataset Integrity**:
    - Validated `stanza_data.json` (27 calibrated songs).
    - Validated `stills_data.json`, `emoji_data.json`, `lyrics_data.json`, `dialogue_data.json`.
-3. **Audio Seeking & Stanza Restart**:
-   - In Stanza mode, audio seeks to `stanzaStart` (e.g. 95s in *Aye Mere Humsafar*) and auto-pauses at `stanzaEnd` (118s).
-   - When identified, audio seeks to `0.0s` and immediately plays the song from the beginning for the Mukhda sing-along.
+### 4. Automated End-to-End Chrome Browser Verification
+- Executed Chrome DevTools Protocol automation in real headless Google Chrome running against local server:
+  - **Sur Sartaaz (Intro Quiz)**: Verified initial fetch of `songs_data.json` (22 songs), Start screen launch, playback queue assembly, host peek drawer, and score tracking.
+  - **Antara Suno! (Stanza Quiz)**: Verified fetch of `stanza_data.json` (27 songs), middle verse auto-pause, and restart from `0.0s` on guess.
+  - **Scene Dekho!**: Verified 16:9 still visual, 3-tier progressive de-blur/sharpen mystery lens, clue drawer, and celebration card.
+  - **Emoji Dhamaka!**: Verified banner cards, progressive clues, and reveal card.
+  - **Angrezi Babu**: Verified parchment cards, TTS read-aloud trigger, and original song details reveal.
+  - **Dialogue Baazi**: Verified quote box, blank placeholder `? ? ? ?`, hint levels, and punchline reveal.
+- **Zero console errors**: 100% clean runtime across all 6 games.

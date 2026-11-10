@@ -33,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.1">
+    <link rel="stylesheet" href="style.css?v=3.1">
 </head>
 <body>
     <!-- Animated background particles -->
@@ -403,7 +403,7 @@
                 <div class="dock-sub-row">
                     <button type="button" class="btn-action btn-action-secondary" id="btnReplay" onclick="replayClip()">
                         <span class="btn-icon">🔄</span>
-                        <span class="btn-label">Replay Intro</span>
+                        <span class="btn-label" id="btnReplayText">Replay Intro</span>
                         <kbd class="kbd-badge">R</kbd>
                     </button>
                     <button type="button" class="btn-action btn-action-secondary" id="btnSkip" onclick="skipSong()">
@@ -429,7 +429,7 @@
                     </button>
                     <button type="button" class="btn-action btn-action-secondary" id="btnReplayFull" onclick="replayFullSong()">
                         <span class="btn-icon">🔄</span>
-                        <span class="btn-label">Replay Vocals</span>
+                        <span class="btn-label" id="btnReplayFullText">Replay Vocals</span>
                         <kbd class="kbd-badge">R</kbd>
                     </button>
                 </div>
@@ -666,7 +666,7 @@
     <!-- Confetti canvas -->
     <canvas id="confettiCanvas"></canvas>
 
-    <script src="game.js?v=3.0"></script>
-    <script src="party_games.js?v=3.0"></script>
+    <script src="game.js?v=3.1"></script>
+    <script src="party_games.js?v=3.1"></script>
 </body>
 </html>

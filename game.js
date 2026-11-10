@@ -264,7 +264,7 @@ window.stopMusicForParty = function() {
     cleanupAudio();
 };
 
-window.initParticles = initParticles;
+window.initParticles = createParticles;
 
 // ---- Action Dock Phase Switcher ----
 function setDockPhase(phaseId) {
