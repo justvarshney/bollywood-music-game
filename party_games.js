@@ -43,12 +43,20 @@
             dataFile: 'dialogue_data.json',
             countPillDefault: '10',
             badge: 'Filmi Dialogue'
+        },
+        clip: {
+            title: 'Action Replay!',
+            subtitle: 'Watch the scene clip and guess the Bollywood blockbuster',
+            icon: '🎬',
+            dataFile: 'clips_data.json',
+            countPillDefault: '10',
+            badge: 'Video Scene Challenge'
         }
     };
 
     // ---- State ----
     const partyState = {
-        activeMode: null, // 'still' | 'emoji' | 'lyrics' | 'dialogue'
+        activeMode: null, // 'still' | 'emoji' | 'lyrics' | 'dialogue' | 'clip'
         cache: {}, // loaded datasets
         items: [],
         currentIndex: 0,
@@ -57,9 +65,11 @@
         streak: 0,
         bestStreak: 0,
         clueLevel: 0, // 0: none, 1: clue1, 2: clue2, 3: clue3
-        mysteryFocusStep: 0, // 0: high blur/zoom, 1: mid, 2: low, 3: crisp
-        instantCrisp: false,
+        mysteryFocusStep: 3, // Always crisp (no blur)
+        instantCrisp: true,
         hostPeekVisible: false,
+        dialogueAudio: null, // HTMLAudioElement for dialogue snippets
+        isDialogueAudioPlaying: false,
         status: 'active', // 'active' | 'revealed'
     };
 
@@ -85,6 +95,18 @@
             target.scrollTop = 0;
         }
         
+        // Stop any dialogue audio or clip video if running
+        stopDialogueAudio();
+        stopClipVideo();
+
+        if (screenId !== 'partyGameScreen') {
+            const pgs = $('partyGameScreen');
+            if (pgs) {
+                pgs.classList.remove('mode-still-active');
+                pgs.classList.remove('mode-clip-active');
+            }
+        }
+
         // If navigating away from music game, stop any playing music
         if (screenId !== 'gameScreen' && typeof window.stopMusicForParty === 'function') {
             window.stopMusicForParty();
@@ -121,12 +143,22 @@
         // Custom options per game mode
         const stillOptions = $('partyStillOptions');
         if (stillOptions) {
-            stillOptions.classList.toggle('hidden', mode !== 'still');
+            stillOptions.classList.add('hidden');
         }
 
         const lyricsOptions = $('partyLyricsOptions');
         if (lyricsOptions) {
             lyricsOptions.classList.toggle('hidden', mode !== 'lyrics');
+        }
+
+        const dialogueOptions = $('partyDialogueOptions');
+        if (dialogueOptions) {
+            dialogueOptions.classList.toggle('hidden', mode !== 'dialogue');
+        }
+
+        const clipOptions = $('partyClipOptions');
+        if (clipOptions) {
+            clipOptions.classList.toggle('hidden', mode !== 'clip');
         }
 
         // Set default pill count
@@ -163,9 +195,8 @@
         const activePill = document.querySelector('#partyCountPills .count-pill.active');
         const countVal = activePill ? activePill.getAttribute('data-count') : '10';
 
-        // Check options
-        const crispToggle = $('toggleInstantCrisp');
-        partyState.instantCrisp = crispToggle ? crispToggle.checked : false;
+        // Always instant crisp (no blur)
+        partyState.instantCrisp = true;
 
         // Load data if not already cached
         if (!partyState.cache[mode]) {
@@ -199,12 +230,21 @@
         partyState.bestStreak = 0;
 
         partyHaptic('tap');
+        const pgs = $('partyGameScreen');
+        const isVisualMode = (mode === 'still' || mode === 'clip');
+        if (pgs) {
+            pgs.classList.toggle('mode-still-active', isVisualMode);
+            pgs.classList.toggle('mode-clip-active', mode === 'clip');
+        }
         showAppScreen('partyGameScreen');
         loadCurrentQuestion();
     };
 
     // ---- Load Question ----
     function loadCurrentQuestion() {
+        stopDialogueAudio();
+        stopClipVideo();
+
         const item = partyState.items[partyState.currentIndex];
         if (!item) {
             finishPartyGame();
@@ -213,7 +253,7 @@
 
         partyState.status = 'active';
         partyState.clueLevel = 0;
-        partyState.mysteryFocusStep = partyState.instantCrisp ? 3 : 0;
+        partyState.mysteryFocusStep = 3;
         partyState.hostPeekVisible = false;
 
         // Header Updates
@@ -240,34 +280,45 @@
         const stage = $('partyStageArea');
         if (!stage) return;
 
+        // Toggle mode-still-active and mode-clip-active for dedicated centered layout
+        const gameScreen = $('partyGameScreen');
+        const isVisualMode = (mode === 'still' || mode === 'clip');
+        if (gameScreen) {
+            gameScreen.classList.toggle('mode-still-active', isVisualMode);
+            gameScreen.classList.toggle('mode-clip-active', mode === 'clip');
+        }
+
         let html = '';
 
         if (mode === 'still') {
-            const blurClass = getBlurClass(partyState.mysteryFocusStep);
             html = `
                 <div class="still-game-stage">
-                    <div class="still-image-frame ${blurClass}" id="stillImageFrame">
-                        <img src="${item.image}" alt="Movie Still" class="still-photo" id="stillPhoto"
+                    <div class="still-image-frame" id="stillImageFrame">
+                        <img src="${encodeURI(item.image)}" alt="Movie Scene" class="still-photo" id="stillPhoto"
                              onerror="this.onerror=null; this.src='stills/Dilwale Dulhania Le Jayenge.svg';">
-                        <div class="mystery-lens-overlay" id="mysteryLensOverlay">
-                            <span class="lens-badge">${getMysteryBadgeText(partyState.mysteryFocusStep)}</span>
-                        </div>
                     </div>
-
-                    <div class="still-controls-row">
-                        <button type="button" class="btn-party-sub btn-sharpen" onclick="sharpenStillImage()" id="btnSharpen">
-                            <span class="btn-sub-icon">🔍</span>
-                            <span class="btn-sub-label">Sharpen Focus (${partyState.mysteryFocusStep}/3)</span>
-                            <kbd class="kbd-badge-sub">F</kbd>
-                        </button>
-                        <button type="button" class="btn-party-sub btn-clue" onclick="showNextPartyClue()" id="btnClue">
-                            <span class="btn-sub-icon">💡</span>
-                            <span class="btn-sub-label">Show Clue (<span id="clueCounterText">0</span>/3)</span>
-                            <kbd class="kbd-badge-sub">H</kbd>
+                </div>
+            `;
+        } else if (mode === 'clip') {
+            html = `
+                <div class="still-game-stage clip-game-stage">
+                    <div class="still-image-frame clip-video-frame" id="clipVideoFrame">
+                        <video src="${encodeURI(item.video)}"
+                               class="still-photo clip-video"
+                               id="clipVideo"
+                               autoplay
+                               playsinline
+                               loop
+                               preload="auto">
+                        </video>
+                    </div>
+                    <div class="still-controls-row clip-controls-row">
+                        <button type="button" class="btn-party-sub btn-replay-clip" onclick="replayClipVideo()" id="btnReplayClip" title="Replay Video Scene Clip (Shortcut: R)">
+                            <span class="btn-sub-icon">🔁</span>
+                            <span class="btn-sub-label">Replay Clip</span>
+                            <kbd class="kbd-badge-sub">R</kbd>
                         </button>
                     </div>
-
-                    <div class="party-clues-box" id="partyCluesBox"></div>
                 </div>
             `;
         } else if (mode === 'emoji') {
@@ -316,6 +367,7 @@
             `;
         } else if (mode === 'dialogue') {
             const promptWithBlank = item.prompt.replace('______', '<span class="dialogue-blank" id="dialogueBlankWord">? ? ? ?</span>');
+            const hasAudio = !!item.audio;
             html = `
                 <div class="dialogue-game-stage">
                     <div class="dialogue-quote-card">
@@ -325,6 +377,13 @@
                     </div>
 
                     <div class="still-controls-row">
+                        ${hasAudio ? `
+                        <button type="button" class="btn-party-sub btn-dialogue-audio" onclick="toggleDialogueAudio()" id="btnDialogueAudio" title="Play or Pause Dialogue Audio (Shortcut: A)">
+                            <span class="btn-sub-icon" id="dialogueAudioIcon">🎧</span>
+                            <span class="btn-sub-label" id="dialogueAudioLabel">Listen Audio</span>
+                            <kbd class="kbd-badge-sub">A</kbd>
+                        </button>
+                        ` : ''}
                         <button type="button" class="btn-party-sub btn-clue" onclick="showNextPartyClue()" id="btnClue">
                             <span class="btn-sub-icon">💡</span>
                             <span class="btn-sub-label">Show Clue (<span id="clueCounterText">0</span>/2)</span>
@@ -339,6 +398,20 @@
 
         stage.innerHTML = html;
         updatePartyCluesDisplay();
+
+        if (mode === 'clip') {
+            setTimeout(() => {
+                const videoEl = $('clipVideo');
+                if (videoEl) {
+                    const playPromise = videoEl.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(err => {
+                            console.log('Video autoplay waiting for user interaction:', err);
+                        });
+                    }
+                }
+            }, 60);
+        }
     }
 
     // Helper for mystery lens steps
@@ -442,6 +515,95 @@
         window.speechSynthesis.speak(utterance);
     };
 
+    // ---- Dialogue Audio Player (Dialogue Baazi) ----
+    function stopDialogueAudio() {
+        if (partyState.dialogueAudio) {
+            try {
+                partyState.dialogueAudio.pause();
+                partyState.dialogueAudio.currentTime = 0;
+            } catch (e) {}
+            partyState.isDialogueAudioPlaying = false;
+            updateDialogueAudioButtons(false);
+        }
+    }
+
+    window.toggleDialogueAudio = function () {
+        if (partyState.activeMode !== 'dialogue') return;
+        const item = partyState.items[partyState.currentIndex];
+        if (!item || !item.audio) return;
+
+        if (partyState.isDialogueAudioPlaying) {
+            stopDialogueAudio();
+            partyHaptic('tap');
+        } else {
+            playDialogueAudio();
+        }
+    };
+
+    window.playDialogueAudio = function (isAutoPlay = false) {
+        if (partyState.activeMode !== 'dialogue') return;
+        const item = partyState.items[partyState.currentIndex];
+        if (!item || !item.audio) return;
+
+        if (!partyState.dialogueAudio) {
+            partyState.dialogueAudio = new Audio();
+        }
+
+        const audio = partyState.dialogueAudio;
+        audio.src = encodeURI(item.audio);
+        audio.currentTime = 0;
+
+        audio.onended = () => {
+            partyState.isDialogueAudioPlaying = false;
+            updateDialogueAudioButtons(false);
+        };
+
+        audio.onerror = (e) => {
+            partyState.isDialogueAudioPlaying = false;
+            updateDialogueAudioButtons(false);
+            if (!isAutoPlay) {
+                console.warn('Dialogue audio could not be played:', item.audio, e);
+                if (typeof showScorePop === 'function') {
+                    showScorePop('⚠️ Audio file not found');
+                }
+            }
+        };
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                partyState.isDialogueAudioPlaying = true;
+                updateDialogueAudioButtons(true);
+            }).catch(err => {
+                partyState.isDialogueAudioPlaying = false;
+                updateDialogueAudioButtons(false);
+                if (!isAutoPlay) {
+                    console.log('Audio playback prevented:', err);
+                }
+            });
+        }
+    };
+
+    function updateDialogueAudioButtons(isPlaying) {
+        const btn = $('btnDialogueAudio');
+        const icon = $('dialogueAudioIcon');
+        const label = $('dialogueAudioLabel');
+        if (btn && icon && label) {
+            btn.classList.toggle('playing', isPlaying);
+            icon.textContent = isPlaying ? '⏸' : '🎧';
+            label.textContent = isPlaying ? 'Pause Audio' : 'Listen Audio';
+        }
+
+        const rBtn = $('btnRevealAudio');
+        const rIcon = $('revealAudioIcon');
+        const rLabel = $('revealAudioLabel');
+        if (rBtn && rIcon && rLabel) {
+            rBtn.classList.toggle('playing', isPlaying);
+            rIcon.textContent = isPlaying ? '⏸' : '🔊';
+            rLabel.textContent = isPlaying ? 'Pause Audio' : 'Replay Dialogue Audio';
+        }
+    }
+
     // ---- Host Peek Toggle ----
     window.togglePartyPeek = function () {
         partyState.hostPeekVisible = !partyState.hostPeekVisible;
@@ -464,6 +626,8 @@
             answerText = `${item.hindiTitle} (${item.movie})`;
         } else if (partyState.activeMode === 'dialogue') {
             answerText = `Missing: "${item.missingWord}" • ${item.movie}`;
+        } else if (partyState.activeMode === 'clip') {
+            answerText = item.year ? `${item.movie} (${item.year})` : item.movie;
         }
 
         box.textContent = answerText;
@@ -478,6 +642,26 @@
         if (box) box.classList.add('hidden');
         if (label) label.textContent = 'Peek Answer (Host)';
     }
+
+    // ---- Video Clip Player (Action Replay!) ----
+    function stopClipVideo() {
+        const v = $('clipVideo');
+        if (v) {
+            try {
+                v.pause();
+            } catch (e) {}
+        }
+    }
+
+    window.replayClipVideo = function () {
+        const v = $('clipVideo');
+        if (v) {
+            v.currentTime = 0;
+            const p = v.play();
+            if (p !== undefined) p.catch(() => {});
+            partyHaptic('tap');
+        }
+    };
 
     // ---- Action Dock Controls ----
     function updatePartyDockState(phase) {
@@ -527,6 +711,9 @@
         const stage = $('partyStageArea');
         if (!item || !stage) return;
 
+        // Stop video playback on reveal
+        stopClipVideo();
+
         // Fully crisp still image if mode is still
         const frame = $('stillImageFrame');
         if (frame) {
@@ -547,17 +734,12 @@
         const titleBadge = wasGuessed ? '🎉 GUESS IDENTIFIED!' : '⏭ SKIPPED';
         const badgeColor = wasGuessed ? 'badge-success' : 'badge-skip';
 
-        if (partyState.activeMode === 'still') {
+        if (partyState.activeMode === 'still' || partyState.activeMode === 'clip') {
             celebrationCard = `
-                <div class="party-reveal-card animate-bounce-in">
+                <div class="party-reveal-card animate-bounce-in still-reveal-clean">
                     <div class="reveal-badge-tag ${badgeColor}">${titleBadge}</div>
                     <h2 class="reveal-title">${escapeHtml(item.movie)}</h2>
-                    <div class="reveal-meta-row">
-                        <span class="meta-tag">📅 ${item.year}</span>
-                        <span class="meta-tag">🎬 ${escapeHtml(item.director)}</span>
-                    </div>
-                    <p class="reveal-cast"><strong>Starring:</strong> ${escapeHtml(item.leadCast)}</p>
-                    <blockquote class="reveal-dialogue">“${escapeHtml(item.iconicDialogue)}”</blockquote>
+                    ${item.year ? `<div class="reveal-meta-row"><span class="meta-tag">📅 ${item.year}</span></div>` : ''}
                 </div>
             `;
         } else if (partyState.activeMode === 'emoji') {
@@ -590,6 +772,7 @@
                 </div>
             `;
         } else if (partyState.activeMode === 'dialogue') {
+            const hasAudio = !!item.audio;
             celebrationCard = `
                 <div class="party-reveal-card animate-bounce-in">
                     <div class="reveal-badge-tag ${badgeColor}">${titleBadge}</div>
@@ -597,8 +780,20 @@
                     <blockquote class="reveal-fullquote">“${escapeHtml(item.fullQuote)}”</blockquote>
                     <h3 class="reveal-title">${escapeHtml(item.movie)} (${item.year})</h3>
                     <p class="reveal-cast">Character: <strong>${escapeHtml(item.character)}</strong> (Played by ${escapeHtml(item.actor)})</p>
+                    ${hasAudio ? `
+                    <div class="reveal-audio-section">
+                        <button type="button" class="btn-party-sub btn-reveal-audio" onclick="toggleDialogueAudio()" id="btnRevealAudio" title="Replay Dialogue Audio Snippet (Shortcut: A)">
+                            <span class="btn-sub-icon" id="revealAudioIcon">🔊</span>
+                            <span class="btn-sub-label" id="revealAudioLabel">Replay Dialogue Audio</span>
+                            <kbd class="kbd-badge-sub">A</kbd>
+                        </button>
+                    </div>
+                    ` : ''}
                 </div>
             `;
+            if (hasAudio) {
+                setTimeout(() => playDialogueAudio(true), 200);
+            }
         }
 
         // Append reveal card to stage
@@ -625,6 +820,9 @@
 
     // ---- Finish Game & Results ----
     function finishPartyGame() {
+        stopDialogueAudio();
+        stopClipVideo();
+
         const accuracy = partyState.totalQuestions > 0 ? Math.round((partyState.score / partyState.totalQuestions) * 100) : 0;
 
         $('partyFinalScore').textContent = partyState.score;
@@ -707,25 +905,30 @@
             e.preventDefault();
             window.skipPartyQuestion();
         }
-        // Clue: H
-        else if (key === 'h' && partyState.status === 'active') {
+        // Clue: H (for modes with clues: emoji, lyrics, dialogue)
+        else if (key === 'h' && partyState.status === 'active' && partyState.activeMode !== 'still' && partyState.activeMode !== 'clip') {
             e.preventDefault();
             window.showNextPartyClue();
-        }
-        // Sharpen Focus: F
-        else if (key === 'f' && partyState.activeMode === 'still') {
-            e.preventDefault();
-            window.sharpenStillImage();
         }
         // Peek Host: P
         else if (key === 'p' && partyState.status === 'active') {
             e.preventDefault();
             window.togglePartyPeek();
         }
+        // Replay Video Clip: R
+        else if (key === 'r' && partyState.activeMode === 'clip') {
+            e.preventDefault();
+            window.replayClipVideo();
+        }
         // Speak Lyrics: S
         else if (key === 's' && partyState.activeMode === 'lyrics') {
             e.preventDefault();
             window.speakLyricsAloud();
+        }
+        // Dialogue Audio: A
+        else if (key === 'a' && partyState.activeMode === 'dialogue') {
+            e.preventDefault();
+            window.toggleDialogueAudio();
         }
         // Exit: Escape
         else if (key === 'escape') {

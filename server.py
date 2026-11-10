@@ -141,12 +141,16 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             elif len(args) >= 1 and str(args[0]).isdigit():
                 code = str(args[0])
 
-            # Friendly tag for song streaming
+            # Friendly tag for audio streaming
             extra = ""
             if "/songs/" in path:
                 song_name = path.split("/songs/")[-1].split("?")[0].split(" HTTP")[0]
                 song_name = urllib.parse.unquote(song_name)
                 extra = f" 🎶 [Song: {song_name}]"
+            elif "/dialogues/" in path:
+                dialogue_name = path.split("/dialogues/")[-1].split("?")[0].split(" HTTP")[0]
+                dialogue_name = urllib.parse.unquote(dialogue_name)
+                extra = f" 🗣️ [Dialogue: {dialogue_name}]"
 
             # ANSI Colors
             GREEN = "\033[92m" if code.startswith(('2', '3')) else "\033[91m"

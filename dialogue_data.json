@@ -9,7 +9,8 @@
     "year": 1987,
     "clue1": "1987 Sci-Fi Classic • Spoken by Bollywood's greatest villain on his throne",
     "clue2": "Delivered in a deep baritone wearing gold epaulettes",
-    "fullQuote": "Mogambo khush hua!"
+    "fullQuote": "Mogambo khush hua!",
+    "audio": "dialogues/Mogambo Khush Hua.mp3"
   },
   {
     "id": "diag_2",
@@ -21,7 +22,8 @@
     "year": 1971,
     "clue1": "1971 Hrishikesh Mukherjee emotional masterpiece",
     "clue2": "Spoken by India's first superstar Rajesh Khanna to Amitabh Bachchan",
-    "fullQuote": "Babumoshai, zindagi badi honi chahiye, lambi nahi."
+    "fullQuote": "Babumoshai, zindagi badi honi chahiye, lambi nahi.",
+    "audio": "dialogues/Babumoshai zindagi badi honi chahiye.mp3"
   },
   {
     "id": "diag_3",
@@ -33,7 +35,8 @@
     "year": 1978,
     "clue1": "Iconic underworld thriller dialogue written by Salim-Javed",
     "clue2": "Delivered while outsmarting 11 countries' police forces",
-    "fullQuote": "Don ko pakadna mushkil hi nahi, namumkin hai."
+    "fullQuote": "Don ko pakadna mushkil hi nahi, namumkin hai.",
+    "audio": "dialogues/Don ko pakadna mushkil hi.mp3"
   },
   {
     "id": "diag_4",
@@ -45,7 +48,8 @@
     "year": 1994,
     "clue1": "1994 Slapstick Comedy Classic • Spoken to Robert & Bhalla",
     "clue2": "Pointing aggressively at a drawn cross mark on the cheek",
-    "fullQuote": "Teja main hoon, mark idhar hai!"
+    "fullQuote": "Teja main hoon, mark idhar hai!",
+    "audio": "dialogues/Teja main hoon mark idhar.mp3"
   },
   {
     "id": "diag_5",
@@ -57,7 +61,8 @@
     "year": 1994,
     "clue1": "Nephew of Mogambo wearing a black cape and red lining",
     "clue2": "'Khandaani chor hoon main... aaya hoon toh kuch toh leke jaaoonga!'",
-    "fullQuote": "Crime Master Gogo naam hai mera, aankhen nikaal kar gotiyan khelta hoon!"
+    "fullQuote": "Crime Master Gogo naam hai mera, aankhen nikaal kar gotiyan khelta hoon!",
+    "audio": "dialogues/Crime Master Gogo naam hai.mp3"
   },
   {
     "id": "diag_6",
@@ -69,7 +74,8 @@
     "year": 2007,
     "clue1": "2007 Reincarnation Blockbuster directed by Farah Khan",
     "clue2": "'Hamari filmon ki tarah, hamari zindagi mein bhi end mein sab theek ho hi jaata hai...'",
-    "fullQuote": "Picture abhi baaki hai mere dost!"
+    "fullQuote": "Picture abhi baaki hai mere dost!",
+    "audio": "dialogues/Picture abhi baaki hai mere.mp3"
   },
   {
     "id": "diag_7",
@@ -81,7 +87,8 @@
     "year": 1995,
     "clue1": "1995 Romantic Milestone • Spoken inside a train compartment in Switzerland",
     "clue2": "Said with a signature boyish wink to Kajol (Simran)",
-    "fullQuote": "Bade bade deshon mein aisi choti choti baatein hoti rehti hain, Senorita!"
+    "fullQuote": "Bade bade deshon mein aisi choti choti baatein hoti rehti hain, Senorita!",
+    "audio": "dialogues/Bade bade deshon mein aisi.mp3"
   },
   {
     "id": "diag_8",
@@ -93,7 +100,8 @@
     "year": 2010,
     "clue1": "2010 Action Romance • Spoken by Rajjo pottery seller to Chulbul Pandey",
     "clue2": "Sonakshi Sinha's viral debut line to Salman Khan",
-    "fullQuote": "Thappad se darr nahi lagta sahab, pyaar se lagta hai."
+    "fullQuote": "Thappad se darr nahi lagta sahab, pyaar se lagta hai.",
+    "audio": "dialogues/Thappad se darr nahi lagta.mp3"
   },
   {
     "id": "diag_9",
@@ -105,7 +113,8 @@
     "year": 2000,
     "clue1": "Gurukul College Motto spoken by the strict headmaster",
     "clue2": "Amitabh Bachchan's baritone code of conduct in cold winter robes",
-    "fullQuote": "Parampara, Pratishtha, Anushasan. Yeh is Gurukul ke teen stambh hain."
+    "fullQuote": "Parampara, Pratishtha, Anushasan. Yeh is Gurukul ke teen stambh hain.",
+    "audio": "dialogues/Parampara Pratishtha Anushasan Yeh is.mp3"
   },
   {
     "id": "diag_10",
@@ -117,7 +126,8 @@
     "year": 1997,
     "clue1": "1997 Yash Chopra Dance Musical • Also used in multiple SRK films",
     "clue2": "Delivered with charming self-confidence by the King of Romance",
-    "fullQuote": "Rahul... naam toh suna hoga."
+    "fullQuote": "Rahul... naam toh suna hoga.",
+    "audio": "dialogues/Rahul naam toh suna hoga.mp3"
   },
   {
     "id": "diag_11",
@@ -129,7 +139,8 @@
     "year": 2000,
     "clue1": "2000 Priyadarshan Comedy • Spoken wearing dhoti and glasses held by string",
     "clue2": "'Khopdi tod saale ka!' One of the most meme'd dialogues in history",
-    "fullQuote": "Yeh Baburao ka style hai re baba!"
+    "fullQuote": "Yeh Baburao ka style hai re baba!",
+    "audio": "dialogues/Yeh Baburao ka style hai.mp3"
   },
   {
     "id": "diag_12",
@@ -141,7 +152,8 @@
     "year": 2007,
     "clue1": "2007 Imtiaz Ali Classic • Spoken by energetic Bhatinda girl to Aditya",
     "clue2": "The ultimate anthem of unapologetic self-love and confidence",
-    "fullQuote": "Main apni favorite hoon!"
+    "fullQuote": "Main apni favorite hoon!",
+    "audio": "dialogues/Main apni favorite hoon.mp3"
   },
   {
     "id": "diag_13",
@@ -153,7 +165,8 @@
     "year": 2012,
     "clue1": "2012 Anurag Kashyap Crime Epic in Dhanbad coal belt",
     "clue2": "Nawazuddin Siddiqui smoking while swearing vengeance for Sardar Khan",
-    "fullQuote": "Baap ka, dada ka, bhai ka... sabka badla lega re tera Faizal!"
+    "fullQuote": "Baap ka, dada ka, bhai ka... sabka badla lega re tera Faizal!",
+    "audio": "dialogues/Baap ka dada ka bhai.mp3"
   },
   {
     "id": "diag_14",
@@ -165,7 +178,8 @@
     "year": 1975,
     "clue1": "1975 Salim-Javed Classic under the warehouse dockyard",
     "clue2": "Shashi Kapoor's quiet, devastating comeback to Amitabh's building and bank balance",
-    "fullQuote": "Mere paas Maa hai!"
+    "fullQuote": "Mere paas Maa hai!",
+    "audio": "dialogues/Mere paas Maa hai.mp3"
   },
   {
     "id": "diag_15",
@@ -177,6 +191,7 @@
     "year": 2009,
     "clue1": "2009 Rajkumar Hirani Masterpiece on learning vs marks",
     "clue2": "Spoken by Rancho to Farhan and Raju on the college campus",
-    "fullQuote": "Kamyabi ke peeche mat bhago, kabil bano, kamyabi jhak maarke peeche aayegi!"
+    "fullQuote": "Kamyabi ke peeche mat bhago, kabil bano, kamyabi jhak maarke peeche aayegi!",
+    "audio": "dialogues/Kamyabi ke peeche mat bhago.mp3"
   }
 ]

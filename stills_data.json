@@ -10,7 +10,7 @@
     "clue1": "2009 • Blockbuster campus comedy directed by Rajkumar Hirani",
     "clue2": "Starring: Aamir Khan, R. Madhavan, Sharman Joshi, Kareena Kapoor",
     "clue3": "Pangong Lake scooter climax & Virus's famous imperial pen",
-    "image": "stills/3 Idiots.svg"
+    "image": "images/3Idiots.jpg"
   },
   {
     "id": "still_2",
@@ -23,7 +23,7 @@
     "clue1": "1994 • Cult comedy starring Aamir Khan and Salman Khan",
     "clue2": "Features Crime Master Gogo, Robert, Bhalla, and twin Tejas",
     "clue3": "'Do mastaane chale zindagi banane' & hilarious Vasco Da Gama gun scene",
-    "image": "stills/Andaz Apna Apna.svg"
+    "image": "images/AndazApnaApna.jpg"
   },
   {
     "id": "still_3",
@@ -36,150 +36,7 @@
     "clue1": "1993 • Thriller directed by Abbas-Mustan",
     "clue2": "Starring: Shah Rukh Khan in an iconic anti-hero revenge role",
     "clue3": "Famous rooftop push scene & dual identity (Vicky Malhotra)",
-    "image": "stills/Baazigar.svg"
-  },
-  {
-    "id": "still_4",
-    "movie": "Chak De! India",
-    "year": 2007,
-    "leadCast": "Shah Rukh Khan, Vidya Malvade, Sagarika Ghatge, Shilpa Shukla",
-    "director": "Shimit Amin",
-    "iconicDialogue": "Sattar minute, sattar minute hain tumhare paas! Shayad tumhari zindagi ke sabse khaas sattar minute!",
-    "sceneDescription": "Coach Kabir Khan delivering the immortal locker room motivational speech before the final match.",
-    "clue1": "2007 • Landmark sports drama produced by YRF",
-    "clue2": "Starring: Shah Rukh Khan as Kabir Khan coaching the women's hockey team",
-    "clue3": "World Cup hockey final in Melbourne & the 'Sattar Minute' speech",
-    "image": "stills/Chak De! India.svg"
-  },
-  {
-    "id": "still_5",
-    "movie": "Deewaar",
-    "year": 1975,
-    "leadCast": "Amitabh Bachchan, Shashi Kapoor, Nirupa Roy, Parveen Babi",
-    "director": "Yash Chopra",
-    "iconicDialogue": "Aaj mere paas buildinge hain, property hai, bank balance hai... tere paas kya hai? Mere paas Maa hai!",
-    "sceneDescription": "Vijay and Inspector Ravi confronting each other in the warehouse regarding their mother.",
-    "clue1": "1975 • Classic written by Salim-Javed, directed by Yash Chopra",
-    "clue2": "Starring: Amitabh Bachchan as Angry Young Man Vijay & Shashi Kapoor",
-    "clue3": "'Mera baap chor hai' tattoo & the immortal 'Mere paas Maa hai' duel",
-    "image": "stills/Deewaar.svg"
-  },
-  {
-    "id": "still_6",
-    "movie": "Dil Chahta Hai",
-    "year": 2001,
-    "leadCast": "Aamir Khan, Saif Ali Khan, Akshaye Khanna, Preity Zinta",
-    "director": "Farhan Akhtar",
-    "iconicDialogue": "Hum dost the, hain aur rahenge... Ya toh dosti gehri hai, ya yeh photo 3D hai!",
-    "sceneDescription": "Akash, Sameer, and Sid sitting side-by-side on the stone ledge of Chapora Fort overlooking the Goa sea.",
-    "clue1": "2001 • Cult classic redefining modern friendship & road trips",
-    "clue2": "Starring: Aamir Khan, Saif Ali Khan, Akshaye Khanna",
-    "clue3": "Goa trip scene at Chapora Fort overlooking the sea",
-    "image": "stills/Dil Chahta Hai.svg"
-  },
-  {
-    "id": "still_7",
-    "movie": "Dilwale Dulhania Le Jayenge",
-    "year": 1995,
-    "leadCast": "Shah Rukh Khan, Kajol, Amrish Puri",
-    "director": "Aditya Chopra",
-    "iconicDialogue": "Bade bade deshon mein aisi choti choti baatein hoti rehti hain, Senorita!",
-    "sceneDescription": "Raj extending his hand to Simran from the moving train door amidst lush green fields.",
-    "clue1": "1995 • Directed by Aditya Chopra (YRF)",
-    "clue2": "Starring: Shah Rukh Khan & Kajol",
-    "clue3": "Iconic yellow mustard fields & Eurail train climax scene",
-    "image": "stills/Dilwale Dulhania Le Jayenge.svg"
-  },
-  {
-    "id": "still_8",
-    "movie": "Don",
-    "year": 2006,
-    "leadCast": "Shah Rukh Khan, Priyanka Chopra, Boman Irani, Arjun Rampal",
-    "director": "Farhan Akhtar",
-    "iconicDialogue": "Don ko pakadna mushkil hi nahi, namumkin hai! ... Don ke dushman ki sabse badi galti yeh hai ki woh Don ka dushman hai.",
-    "sceneDescription": "Don in a stylish black suit lighting a cigar with 11 countries' police on his tail.",
-    "clue1": "2006 • Stylish action thriller directed by Farhan Akhtar",
-    "clue2": "Starring: Shah Rukh Khan, Priyanka Chopra (Roma / Jungli Billi)",
-    "clue3": "Kuala Lumpur twin towers skybridge climax & red diary chase",
-    "image": "stills/Don.svg"
-  },
-  {
-    "id": "still_9",
-    "movie": "Gangs of Wasseypur",
-    "year": 2012,
-    "leadCast": "Manoj Bajpayee, Nawazuddin Siddiqui, Richa Chadha, Tigmanshu Dhulia",
-    "director": "Anurag Kashyap",
-    "iconicDialogue": "Baap ka, dada ka, bhai ka, sabka badla lega re tera Faizal! ... Teri keh ke lunga!",
-    "sceneDescription": "Faizal Khan smoking a beedi with aviators and gamchha draped over his shoulder.",
-    "clue1": "2012 • Gritty crime epic directed by Anurag Kashyap",
-    "clue2": "Starring: Manoj Bajpayee (Sardar Khan) & Nawazuddin Siddiqui (Faizal)",
-    "clue3": "Coal mafia rivalry in Dhanbad & 'Hindustan mein jab tak cinema hai...'",
-    "image": "stills/Gangs of Wasseypur.svg"
-  },
-  {
-    "id": "still_10",
-    "movie": "Hera Pheri",
-    "year": 2000,
-    "leadCast": "Akshay Kumar, Suniel Shetty, Paresh Rawal, Tabu",
-    "director": "Priyadarshan",
-    "iconicDialogue": "Yeh Baburao ka style hai! ... Utha le re baba, utha le!",
-    "sceneDescription": "Baburao Apte wearing dhoti and thick specs arguing over the wrong number phone call for Star Garage.",
-    "clue1": "2000 • Legendary comedy directed by Priyadarshan",
-    "clue2": "Starring: Baburao Ganpatrao Apte, Raju & Shyam",
-    "clue3": "Wrong number call from Kabira kidnapping Devi Prasad's granddaughter",
-    "image": "stills/Hera Pheri.svg"
-  },
-  {
-    "id": "still_11",
-    "movie": "Jab We Met",
-    "year": 2007,
-    "leadCast": "Shahid Kapoor, Kareena Kapoor",
-    "director": "Imtiaz Ali",
-    "iconicDialogue": "Main apni favorite hoon! ... Sikhni hoon main Bhatinda ki!",
-    "sceneDescription": "Geet chatting non-stop with a depressed Aditya inside the sleeper train compartment.",
-    "clue1": "2007 • Directed by Imtiaz Ali",
-    "clue2": "Starring: Shahid Kapoor (Aditya) & Kareena Kapoor (Geet)",
-    "clue3": "Train missed at Ratlam station & the hotel 'Decent' scene",
-    "image": "stills/Jab We Met.svg"
-  },
-  {
-    "id": "still_12",
-    "movie": "Kabhi Khushi Kabhie Gham",
-    "year": 2001,
-    "leadCast": "Amitabh Bachchan, Jaya Bachchan, Shah Rukh Khan, Kajol, Hrithik Roshan, Kareena Kapoor",
-    "director": "Karan Johar",
-    "iconicDialogue": "Kabhi khushi kabhie gham... keh diya na, bas keh diya!",
-    "sceneDescription": "Rahul stepping out of the helicopter landing on the lawn of the grand Raichand mansion.",
-    "clue1": "2001 • Grand family saga produced by Dharma Productions",
-    "clue2": "Starring: Amitabh, Jaya, SRK, Kajol, Hrithik, Kareena ('Poo')",
-    "clue3": "Helicopter entry scene & the iconic Chandni Chowk Diwali Aarti",
-    "image": "stills/Kabhi Khushi Kabhie Gham.svg"
-  },
-  {
-    "id": "still_13",
-    "movie": "Kuch Kuch Hota Hai",
-    "year": 1998,
-    "leadCast": "Shah Rukh Khan, Kajol, Rani Mukerji",
-    "director": "Karan Johar",
-    "iconicDialogue": "Rahul is a cheater, he is a cheater! ... Kuch kuch hota hai Rahul, tum nahi samjhoge.",
-    "sceneDescription": "Rahul and Anjali playing one-on-one basketball in college with Anjali's signature hairband.",
-    "clue1": "1998 • Karan Johar's directorial debut",
-    "clue2": "Starring: Shah Rukh Khan, Kajol, Rani Mukerji",
-    "clue3": "St. Xavier's basketball faceoff & Shimla summer camp gazebo dance",
-    "image": "stills/Kuch Kuch Hota Hai.svg"
-  },
-  {
-    "id": "still_14",
-    "movie": "Lagaan",
-    "year": 2001,
-    "leadCast": "Aamir Khan, Gracy Singh, Rachel Shelley, Paul Blackthorne",
-    "director": "Ashutosh Gowariker",
-    "iconicDialogue": "Hum jeet gaye! ... Teen guna lagaan maaf!",
-    "sceneDescription": "Bhuvan and the villagers in dhoti-kurta lining up on the dusty pitch to face the British cricket team.",
-    "clue1": "2001 • Oscar-nominated historic sports drama",
-    "clue2": "Starring: Aamir Khan as Bhuvan against Captain Russell",
-    "clue3": "Cricket match between villagers and British officers in Champaner",
-    "image": "stills/Lagaan.svg"
+    "image": "images/Baazigar.jpg"
   },
   {
     "id": "still_15",
@@ -192,7 +49,7 @@
     "clue1": "2003 • Directed by Rajkumar Hirani",
     "clue2": "Starring: Sanjay Dutt (Munna) & Arshad Warsi (Circuit)",
     "clue3": "Doctor Asthana's laughter therapy & 'Carrom ramvanu, juice pivanu'",
-    "image": "stills/Munna Bhai M.B.B.S..svg"
+    "image": "images/mumma bhai mbbs.jpg"
   },
   {
     "id": "still_16",
@@ -205,20 +62,7 @@
     "clue1": "2007 • Farah Khan's retro reincarnation tribute to 70s Bollywood",
     "clue2": "Starring: Shah Rukh Khan & debutante Deepika Padukone",
     "clue3": "Chandelier fire accident & giant disco ball song 'Dard-e-Disco'",
-    "image": "stills/Om Shanti Om.svg"
-  },
-  {
-    "id": "still_17",
-    "movie": "PK",
-    "year": 2014,
-    "leadCast": "Aamir Khan, Anushka Sharma, Sushant Singh Rajput, Sanjay Dutt",
-    "director": "Rajkumar Hirani",
-    "iconicDialogue": "Wrong number hai! ... Hum confuse ho gaye hain!",
-    "sceneDescription": "PK wearing a yellow scooter helmet, oversized coat, and carrying a vintage cassette player.",
-    "clue1": "2014 • Satirical blockbuster directed by Rajkumar Hirani",
-    "clue2": "Starring: Aamir Khan with wide green eyes, Anushka Sharma (Jagu)",
-    "clue3": "Lost spaceship remote & dancing car battery theft scene",
-    "image": "stills/PK.svg"
+    "image": "images/omshaniOm.jpg"
   },
   {
     "id": "still_18",
@@ -231,20 +75,7 @@
     "clue1": "2014 • Empowering comedy directed by Vikas Bahl",
     "clue2": "Starring: Kangana Ranaut as Rani from Rajouri Garden",
     "clue3": "Solo honeymoon trip across Paris and Amsterdam hostel roommates",
-    "image": "stills/Queen.svg"
-  },
-  {
-    "id": "still_19",
-    "movie": "Sholay",
-    "year": 1975,
-    "leadCast": "Amitabh Bachchan, Dharmendra, Amjad Khan, Hema Malini",
-    "director": "Ramesh Sippy",
-    "iconicDialogue": "Kitne aadmi the? ... Yeh haath humko de de Thakur!",
-    "sceneDescription": "Gabbar Singh pacing over rocky boulders in Ramgarh with his cartridge belt.",
-    "clue1": "1975 • Epic Dacoit Western classic",
-    "clue2": "Starring: Amitabh Bachchan, Dharmendra, Sanjeev Kumar, Amjad Khan",
-    "clue3": "Jai & Veeru riding a motorcycle with a sidecar singing 'Yeh Dosti'",
-    "image": "stills/Sholay.svg"
+    "image": "images/Queen.jpg"
   },
   {
     "id": "still_20",
@@ -257,6 +88,102 @@
     "clue1": "2011 • Road trip drama directed by Zoya Akhtar",
     "clue2": "Starring: Hrithik Roshan, Farhan Akhtar, Abhay Deol",
     "clue3": "Spain bachelor trip: Deep sea diving, Tomatina & Skydiving",
-    "image": "stills/Zindagi Na Milegi Dobara.svg"
+    "image": "images/Zindagi Na Milegi Dobara.jpg"
+  },
+  {
+    "id": "still_30",
+    "movie": "Piku",
+    "year": 2015,
+    "image": "images/Piku.jpg"
+  },
+  {
+    "id": "still_31",
+    "movie": "2 States",
+    "image": "images/2states.jpg"
+  },
+  {
+    "id": "still_32",
+    "movie": "Action Replay",
+    "image": "images/actionReplay.jpg"
+  },
+  {
+    "id": "still_33",
+    "movie": "Ajab Prem Ki Gajab Kahani",
+    "image": "images/ajabPremKigazabKahani.jpg"
+  },
+  {
+    "id": "still_34",
+    "movie": "Barfi",
+    "image": "images/Barfi.jpg"
+  },
+  {
+    "id": "still_35",
+    "movie": "Beta",
+    "image": "images/Beta.jpg"
+  },
+  {
+    "id": "still_36",
+    "movie": "Biwi No. 1",
+    "image": "images/biwinoone.jpg"
+  },
+  {
+    "id": "still_37",
+    "movie": "Jaane Bhi Do Yaro",
+    "image": "images/janebhidoyaro.jpg"
+  },
+  {
+    "id": "still_38",
+    "movie": "Jodha Akbar",
+    "image": "images/jodha_akbar.jpg"
+  },
+  {
+    "id": "still_39",
+    "movie": "Kalank",
+    "image": "images/kalank.jpg"
+  },
+  {
+    "id": "still_40",
+    "movie": "Kal Ho Na Ho",
+    "image": "images/kalHoNaHo.jpg"
+  },
+  {
+    "id": "still_41",
+    "movie": "Kedarnath",
+    "image": "images/kedarnath.jpg"
+  },
+  {
+    "id": "still_42",
+    "movie": "KhoobSurat",
+    "image": "images/Khoobsurat.jpg"
+  },
+  {
+    "id": "still_43",
+    "movie": "Lawaris",
+    "image": "images/Lawaris.jpg"
+  },
+  {
+    "id": "still_44",
+    "movie": "Om Shanti Om",
+    "image": "images/omshaniOm.jpg"
+  },
+  {
+    "id": "still_45",
+    "movie": "Param Sundari",
+    "image": "images/paramSundari.png"
+  },
+  {
+    "id": "still_46",
+    "movie": "Rab ne Bana Di Jodi",
+    "image": "images/rabNeBanadi.jpg"
+  },
+  {
+    "id": "still_47",
+    "movie": "Veer Jara",
+    "image": "images/veerJara.jpg"
+  },
+  {
+    "id": "still_48",
+    "movie": "Ye Jawani Hai Deewani",
+    "image": "images/yeJawaniHaiDiwani.jpg"
   }
 ]

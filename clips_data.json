@@ -1,0 +1,302 @@
+[
+  {
+    "id": "clip_01",
+    "movie": "Dilwale Dulhania Le Jayenge",
+    "year": 1995,
+    "video": "clips/clip_01.mp4"
+  },
+  {
+    "id": "clip_02",
+    "movie": "Kuch Kuch Hota Hai",
+    "year": 1998,
+    "video": "clips/clip_02.mp4"
+  },
+  {
+    "id": "clip_03",
+    "movie": "Dil To Pagal Hai",
+    "year": 1997,
+    "video": "clips/clip_03.mp4"
+  },
+  {
+    "id": "clip_04",
+    "movie": "Kabhi Khushi Kabhie Gham",
+    "year": 2001,
+    "video": "clips/clip_04.mp4"
+  },
+  {
+    "id": "clip_05",
+    "movie": "Lagaan",
+    "year": 2001,
+    "video": "clips/clip_05.mp4"
+  },
+  {
+    "id": "clip_06",
+    "movie": "Kabhi Alvida Naa Kehna",
+    "year": 2006,
+    "video": "clips/clip_06.mp4"
+  },
+  {
+    "id": "clip_07",
+    "movie": "3 Idiots",
+    "year": 2009,
+    "video": "clips/clip_07.mp4"
+  },
+  {
+    "id": "clip_08",
+    "movie": "My Name Is Khan",
+    "year": 2010,
+    "video": "clips/clip_08.mp4"
+  },
+  {
+    "id": "clip_09",
+    "movie": "Zindagi Na Milegi Dobara",
+    "year": 2011,
+    "video": "clips/clip_09.mp4"
+  },
+  {
+    "id": "clip_10",
+    "movie": "Dhoom 2",
+    "year": 2006,
+    "video": "clips/clip_10.mp4"
+  },
+  {
+    "id": "clip_11",
+    "movie": "Chak De! India",
+    "year": 2007,
+    "video": "clips/clip_11.mp4"
+  },
+  {
+    "id": "clip_12",
+    "movie": "Bajrangi Bhaijaan",
+    "year": 2015,
+    "video": "clips/clip_12.mp4"
+  },
+  {
+    "id": "clip_13",
+    "movie": "Queen",
+    "year": 2013,
+    "video": "clips/clip_13.mp4"
+  },
+  {
+    "id": "clip_14",
+    "movie": "Dangal",
+    "year": 2016,
+    "video": "clips/clip_14.mp4"
+  },
+  {
+    "id": "clip_15",
+    "movie": "PK",
+    "year": 2014,
+    "video": "clips/clip_15.mp4"
+  },
+  {
+    "id": "clip_16",
+    "movie": "Taare Zameen Par",
+    "year": 2007,
+    "video": "clips/clip_16.mp4"
+  },
+  {
+    "id": "clip_17",
+    "movie": "Padmaavat",
+    "year": 2018,
+    "video": "clips/clip_17.mp4"
+  },
+  {
+    "id": "clip_18",
+    "movie": "Kabir Singh",
+    "year": 2019,
+    "video": "clips/clip_18.mp4"
+  },
+  {
+    "id": "clip_19",
+    "movie": "Bajirao Mastani",
+    "year": 2015,
+    "video": "clips/clip_19.mp4"
+  },
+  {
+    "id": "clip_20",
+    "movie": "Dil Chahta Hai",
+    "year": 2001,
+    "video": "clips/clip_20.mp4"
+  },
+  {
+    "id": "clip_21",
+    "movie": "Om Shanti Om",
+    "year": 2007,
+    "video": "clips/clip_21.mp4"
+  },
+  {
+    "id": "clip_22",
+    "movie": "Mera Naam Joker",
+    "year": 1970,
+    "video": "clips/clip_22.mp4"
+  },
+  {
+    "id": "clip_23",
+    "movie": "Rockstar",
+    "year": 2011,
+    "video": "clips/clip_23.mp4"
+  },
+  {
+    "id": "clip_24",
+    "movie": "Gangs of Wasseypur",
+    "year": 2012,
+    "video": "clips/clip_24.mp4"
+  },
+  {
+    "id": "clip_25",
+    "movie": "Rang De Basanti",
+    "year": 2006,
+    "video": "clips/clip_25.mp4"
+  },
+  {
+    "id": "clip_26",
+    "movie": "Koi... Mil Gaya",
+    "year": 2003,
+    "video": "clips/clip_26.mp4"
+  },
+  {
+    "id": "clip_27",
+    "movie": "Kahaani",
+    "year": 2012,
+    "video": "clips/clip_27.mp4"
+  },
+  {
+    "id": "clip_28",
+    "movie": "Barfi!",
+    "year": 2012,
+    "video": "clips/clip_28.mp4"
+  },
+  {
+    "id": "clip_29",
+    "movie": "Wake Up Sid",
+    "year": 2009,
+    "video": "clips/clip_29.mp4"
+  },
+  {
+    "id": "clip_30",
+    "movie": "Chennai Express",
+    "year": 2013,
+    "video": "clips/clip_30.mp4"
+  },
+  {
+    "id": "clip_31",
+    "movie": "Kal Ho Naa Ho",
+    "year": 2003,
+    "video": "clips/clip_31.mp4"
+  },
+  {
+    "id": "clip_32",
+    "movie": "Devdas",
+    "year": 2002,
+    "video": "clips/clip_32.mp4"
+  },
+  {
+    "id": "clip_33",
+    "movie": "Goliyon Ki Raasleela Ram-Leela",
+    "year": 2013,
+    "video": "clips/clip_33.mp4"
+  },
+  {
+    "id": "clip_34",
+    "movie": "Sultan",
+    "year": 2016,
+    "video": "clips/clip_34.mp4"
+  },
+  {
+    "id": "clip_35",
+    "movie": "Uri: The Surgical Strike",
+    "year": 2019,
+    "video": "clips/clip_35.mp4"
+  },
+  {
+    "id": "clip_36",
+    "movie": "Andhadhun",
+    "year": 2018,
+    "video": "clips/clip_36.mp4"
+  },
+  {
+    "id": "clip_37",
+    "movie": "Stree",
+    "year": 2018,
+    "video": "clips/clip_37.mp4"
+  },
+  {
+    "id": "clip_38",
+    "movie": "Badhaai Ho",
+    "year": 2018,
+    "video": "clips/clip_38.mp4"
+  },
+  {
+    "id": "clip_39",
+    "movie": "Simmba",
+    "year": 2018,
+    "video": "clips/clip_39.mp4"
+  },
+  {
+    "id": "clip_40",
+    "movie": "Gully Boy",
+    "year": 2019,
+    "video": "clips/clip_40.mp4"
+  },
+  {
+    "id": "clip_41",
+    "movie": "Article 15",
+    "year": 2019,
+    "video": "clips/clip_41.mp4"
+  },
+  {
+    "id": "clip_42",
+    "movie": "Super 30",
+    "year": 2019,
+    "video": "clips/clip_42.mp4"
+  },
+  {
+    "id": "clip_43",
+    "movie": "Tanu Weds Manu",
+    "year": 2011,
+    "video": "clips/clip_43.mp4"
+  },
+  {
+    "id": "clip_44",
+    "movie": "Vicky Donor",
+    "year": 2012,
+    "video": "clips/clip_44.mp4"
+  },
+  {
+    "id": "clip_45",
+    "movie": "M.S. Dhoni: The Untold Story",
+    "year": 2016,
+    "video": "clips/clip_45.mp4"
+  },
+  {
+    "id": "clip_46",
+    "movie": "Raanjhanaa",
+    "year": 2013,
+    "video": "clips/clip_46.mp4"
+  },
+  {
+    "id": "clip_47",
+    "movie": "Pink",
+    "year": 2016,
+    "video": "clips/clip_47.mp4"
+  },
+  {
+    "id": "clip_48",
+    "movie": "Chhichhore",
+    "year": 2019,
+    "video": "clips/clip_48.mp4"
+  },
+  {
+    "id": "clip_49",
+    "movie": "War",
+    "year": 2019,
+    "video": "clips/clip_49.mp4"
+  },
+  {
+    "id": "clip_50",
+    "movie": "Omkara",
+    "year": 2006,
+    "video": "clips/clip_50.mp4"
+  }
+]

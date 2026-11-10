@@ -279,9 +279,11 @@ DEFAULT_METADATA = [
 ]
 
 def clean_name(filename):
-    """Strip extension and clean extra spaces."""
+    """Strip extension and split camelCase, numbers, and snake_case."""
     name = os.path.splitext(filename)[0]
-    return re.sub(r'[\s_]+', ' ', name).strip()
+    s1 = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', name)
+    s2 = re.sub(r'([A-Za-z])([0-9])', r'\1 \2', s1)
+    return re.sub(r'[\s_]+', ' ', s2).strip()
 
 def prepare_stills():
     os.makedirs(STILLS_DIR, exist_ok=True)
@@ -298,12 +300,16 @@ def prepare_stills():
             print(f"Warning reading {DATA_FILE}: {e}")
 
     # Index files from stills/ directory
+    # Prioritize real screenshots (.jpg, .jpeg, .png, .webp) over placeholder .svg
+    def ext_priority(filename):
+        ext = os.path.splitext(filename)[1].lower()
+        return 0 if ext in {".jpg", ".jpeg", ".png", ".webp"} else 1
+
     found_files = []
     if os.path.exists(STILLS_DIR):
-        for f in sorted(os.listdir(STILLS_DIR)):
-            ext = os.path.splitext(f)[1].lower()
-            if ext in SUPPORTED_EXTS:
-                found_files.append(f)
+        raw_files = [f for f in os.listdir(STILLS_DIR) if os.path.splitext(f)[1].lower() in SUPPORTED_EXTS]
+        raw_files.sort(key=lambda f: (ext_priority(f), f.lower()))
+        found_files = raw_files
 
     print(f"Found {len(found_files)} image files in '{STILLS_DIR}/'.")
 
@@ -314,15 +320,17 @@ def prepare_stills():
     seen_movies = set()
 
     # First, handle files present in stills/
-    for idx, f in enumerate(found_files, 1):
+    for f in found_files:
         movie_title = clean_name(f)
         key = movie_title.lower().strip()
+        if key in seen_movies:
+            continue
         
         # Check if we have library or existing metadata
         base_meta = existing_by_movie.get(key) or library_map.get(key, {})
         
         item = {
-            "id": f"still_{idx}",
+            "id": f"still_{len(final_items) + 1}",
             "movie": base_meta.get("movie", movie_title),
             "year": base_meta.get("year", "Classic"),
             "leadCast": base_meta.get("leadCast", "Iconic Bollywood Ensemble"),
