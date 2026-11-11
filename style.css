@@ -190,11 +190,16 @@ body {
 }
 
 /* ===========================
-   START SCREEN
+   START SCREEN & PARTY START SCREEN
    =========================== */
-#startScreen {
+#startScreen,
+#partyStartScreen {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    min-height: 100dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: calc(16px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
@@ -202,12 +207,12 @@ body {
 
 .start-content-scroll {
     width: 100%;
-    max-width: 460px;
-    margin: auto 0;
+    max-width: 500px;
+    margin: auto auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    gap: 22px;
 }
 
 .logo-container {
@@ -1071,11 +1076,16 @@ kbd {
 }
 
 /* ===========================
-   RESULTS SCREEN
+   RESULTS SCREEN & PARTY RESULTS SCREEN
    =========================== */
-#resultsScreen {
+#resultsScreen,
+#partyResultsScreen {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    min-height: 100dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: calc(16px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
@@ -1083,8 +1093,8 @@ kbd {
 
 .results-scroll {
     width: 100%;
-    max-width: 480px;
-    margin: auto 0;
+    max-width: 500px;
+    margin: auto auto;
 }
 
 .results-container {
@@ -1542,12 +1552,13 @@ kbd {
     transform: translateX(4px);
 }
 
-/* Start Screen Back Button */
+/* Start Screen Header Navigation */
 .start-header-nav {
     width: 100%;
     display: flex;
-    justify-content: flex-start;
-    margin-bottom: -10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: -6px;
 }
 
 .btn-back-hub {
@@ -2498,6 +2509,12 @@ kbd {
     color: var(--text-secondary);
 }
 
+[data-theme="light"] .party-badge-chip {
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.22);
+    color: #6d28d9;
+}
+
 [data-theme="light"] .count-pill {
     background: #ffffff;
     color: var(--text-secondary);
@@ -2692,9 +2709,13 @@ kbd {
    ============================================================ */
 @media (min-width: 860px) {
     .party-content-scroll,
-    .game-content-scroll,
-    .start-content-scroll {
+    .game-content-scroll {
         max-width: 840px;
+    }
+    .start-content-scroll,
+    .results-scroll {
+        max-width: 520px;
+        margin: auto auto;
     }
     .game-header {
         max-width: 840px;
@@ -2838,6 +2859,12 @@ kbd {
 .tv-mode .still-image-frame,
 .tv-mode .clip-video-frame {
     max-width: 1100px !important;
+}
+
+.tv-mode .start-content-scroll,
+.tv-mode .results-scroll {
+    max-width: 620px !important;
+    margin: auto auto !important;
 }
 
 .tv-mode .still-photo,
