@@ -130,5 +130,77 @@
     "displayName": "julie julie",
     "introDuration": 26.0,
     "fullFile": "songs/julie julie.mp3"
+  },
+  {
+    "id": "28",
+    "displayName": "To Chaloon",
+    "introDuration": 54.0,
+    "fullFile": "songs/To Chaloon Border 320 Kbps.mp3"
+  },
+  {
+    "id": "29",
+    "displayName": "Madhosh Dil Ki Dhadkan",
+    "introDuration": 36.0,
+    "fullFile": "songs/Madhosh Dil Ki Dhadkan.mp3"
+  },
+  {
+    "id": "30",
+    "displayName": "Deewana Main Chala",
+    "introDuration": 56.0,
+    "fullFile": "songs/Deewana Main Chala.mp3"
+  },
+  {
+    "id": "31",
+    "displayName": "Ek Haseen Ladki Se",
+    "introDuration": 26.0,
+    "fullFile": "songs/Ek Haseen Ladki Se.mp3"
+  },
+  {
+    "id": "32",
+    "displayName": "O Womaniya",
+    "introDuration": 28.0,
+    "fullFile": "songs/O Womaniya.mp3"
+  },
+  {
+    "id": "33",
+    "displayName": "Roobaroo",
+    "introDuration": 21.0,
+    "fullFile": "songs/Roobaroo.mp3"
+  },
+  {
+    "id": "34",
+    "displayName": "Daaroo Vich Pyar",
+    "introDuration": 38.0,
+    "fullFile": "songs/Daaroo Vich Pyar.mp3"
+  },
+  {
+    "id": "35",
+    "displayName": "Sambhala Hai Maine",
+    "introDuration": 57.0,
+    "fullFile": "songs/Sambhala Hai Maine.mp3"
+  },
+  {
+    "id": "36",
+    "displayName": "Pehli Pehli Baar",
+    "introDuration": 32.0,
+    "fullFile": "songs/Pehli Pehli Baar.mp3"
+  },
+  {
+    "id": "37",
+    "displayName": "Neele Neele Ambar",
+    "introDuration": 7.0,
+    "fullFile": "songs/Neele Neele Ambar.mp3"
+  },
+  {
+    "id": "38",
+    "displayName": "Chalo Chale Mitwa",
+    "introDuration": 29.0,
+    "fullFile": "songs/Chalo Chale Mitwa.mp3"
+  },
+  {
+    "id": "39",
+    "displayName": "Mujhse Juda Hokar",
+    "introDuration": 18.0,
+    "fullFile": "songs/Mujhse Juda Hokar.mp3"
   }
 ]

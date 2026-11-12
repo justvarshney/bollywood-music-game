@@ -132,6 +132,15 @@
     // ---- Launch Party Game Config Screen ----
     window.selectPartyGame = function (mode) {
         if (!GAME_CONFIGS[mode]) return;
+
+        if (window.authManager && window.authManager.hasUsedFreeTrial(mode)) {
+            window.authManager.showUpgradeModal('game_limit', {
+                title: 'Free Trial Completed',
+                desc: 'You have already enjoyed your free trial for this game! Upgrade to a Paid Pass to play unlimited times across all 7 Bollywood games.'
+            });
+            return;
+        }
+
         partyState.activeMode = mode;
         const cfg = GAME_CONFIGS[mode];
 
@@ -162,10 +171,16 @@
         }
 
         // Set default pill count
+        const isPaid = window.authManager && window.authManager.isPaid();
+        const defaultCount = isPaid ? cfg.countPillDefault : '5';
         const pills = document.querySelectorAll('#partyCountPills .count-pill');
         pills.forEach(p => {
-            p.classList.toggle('active', p.getAttribute('data-count') === cfg.countPillDefault);
+            p.classList.toggle('active', p.getAttribute('data-count') === defaultCount);
         });
+
+        if (window.authManager && typeof window.authManager.updateRoundPillsUI === 'function') {
+            window.authManager.updateRoundPillsUI();
+        }
 
         partyHaptic('tap');
         showAppScreen('partyStartScreen');
@@ -178,6 +193,16 @@
         container.addEventListener('click', (e) => {
             const btn = e.target.closest('.count-pill');
             if (!btn) return;
+
+            const countVal = btn.getAttribute('data-count');
+            if (window.authManager && !window.authManager.isPaid() && countVal !== '5') {
+                window.authManager.showUpgradeModal('rounds_limit', {
+                    title: 'Unlock ' + countVal + ' Quizzes',
+                    desc: 'Free trial includes up to <strong>5 quizzes</strong> per round. Upgrade to a Paid Pass to unlock <strong>10, 15, and 20 quizzes</strong>!'
+                });
+                return;
+            }
+
             container.querySelectorAll('.count-pill').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             partyHaptic('tap');
@@ -191,9 +216,16 @@
 
         const cfg = GAME_CONFIGS[mode];
 
-        // Read selected question count
+        // Read selected question count (strictly 5, 10, 15, 20)
         const activePill = document.querySelector('#partyCountPills .count-pill.active');
-        const countVal = activePill ? activePill.getAttribute('data-count') : '10';
+        const parsedVal = activePill ? parseInt(activePill.getAttribute('data-count'), 10) : 10;
+        const roundsToPlay = [5, 10, 15, 20].includes(parsedVal) ? parsedVal : 10;
+
+        // Gatekeeper: Validate user plan and rounds
+        if (window.authManager && typeof window.authManager.checkCanPlay === 'function') {
+            const allowed = await window.authManager.checkCanPlay(mode, roundsToPlay);
+            if (!allowed) return;
+        }
 
         // Always instant crisp (no blur)
         partyState.instantCrisp = true;
@@ -217,10 +249,9 @@
             return;
         }
 
-        // Shuffle questions
+        // Shuffle questions randomly from dataset and pick exactly selected count
         const shuffled = [...rawData].sort(() => Math.random() - 0.5);
-        let count = countVal === 'all' ? shuffled.length : parseInt(countVal, 10);
-        count = Math.min(count, shuffled.length);
+        const count = Math.min(roundsToPlay, shuffled.length);
 
         partyState.items = shuffled.slice(0, count);
         partyState.totalQuestions = partyState.items.length;

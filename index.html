@@ -33,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=5.2">
+    <link rel="stylesheet" href="style.css?v=5.4">
 </head>
 <body>
     <!-- Animated background particles -->
@@ -45,6 +45,9 @@
     <div id="hubScreen" class="screen active">
         <div class="hub-content-scroll">
             <header class="hub-header">
+                <!-- User Profile & Authentication Bar -->
+                <div id="authBarContainer" class="auth-bar-container"></div>
+
                 <div class="hub-logo-glow"></div>
                 <div class="hub-badge">🎉 BOLLYWOOD PARTY ADDA</div>
                 <h1 class="hub-title">
@@ -279,16 +282,14 @@
                 <div class="pill-group" id="songCountPills">
                     <button type="button" class="count-pill" data-count="5">5</button>
                     <button type="button" class="count-pill active" data-count="10">10</button>
+                    <button type="button" class="count-pill" data-count="15">15</button>
                     <button type="button" class="count-pill" data-count="20">20</button>
-                    <button type="button" class="count-pill" data-count="30">30</button>
-                    <button type="button" class="count-pill" data-count="all">All</button>
                 </div>
                 <select id="songCount" class="hidden-accessible" aria-label="Select song count">
                     <option value="5">5 Songs</option>
                     <option value="10" selected>10 Songs</option>
+                    <option value="15">15 Songs</option>
                     <option value="20">20 Songs</option>
-                    <option value="30">30 Songs</option>
-                    <option value="50">All Songs</option>
                 </select>
             </div>
 
@@ -558,7 +559,6 @@
                     <button type="button" class="count-pill active" data-count="10">10</button>
                     <button type="button" class="count-pill" data-count="15">15</button>
                     <button type="button" class="count-pill" data-count="20">20</button>
-                    <button type="button" class="count-pill" data-count="all">All</button>
                 </div>
             </div>
 
@@ -730,10 +730,440 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         MODAL 1: AUTHENTICATION (MOBILE NUMBER & OTP LOGIN/SIGNUP)
+         ============================================================ -->
+    <div id="authModal" class="modal-overlay">
+        <div class="modal-dialog auth-modal-dialog">
+            <button type="button" class="btn-modal-close" onclick="authManager.hideAuthModal()" title="Close">&times;</button>
+            
+            <!-- Step 1: Mobile Number Input -->
+            <div id="authStepPhone" class="auth-step-panel">
+                <div class="modal-header">
+                    <div class="auth-header-icon">📱</div>
+                    <div class="msg91-whatsapp-badge" id="authWhatsAppBadge">
+                        <span class="whatsapp-badge-icon">💬</span>
+                        <span>WhatsApp &amp; SMS OTP powered by MSG91</span>
+                    </div>
+                    <h2 class="modal-title">Sign In / Free Sign Up</h2>
+                    <p class="modal-subtitle">Enter your 10-digit mobile number to access all 7 Bollywood party games!</p>
+                </div>
+
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label for="authMobileInput" class="form-label">10-Digit Mobile Number</label>
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">🇮🇳 +91</span>
+                            <input type="tel" id="authMobileInput" class="form-input" placeholder="e.g. 9876543210" maxlength="10" autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <div id="authErrorMsg" class="auth-error-banner hidden"></div>
+
+                    <button type="button" id="btnSendOtp" class="btn-modal-submit" onclick="authManager.handlePhoneContinue()">
+                        <span>📲 Continue &rarr;</span>
+                    </button>
+
+                    <div class="auth-perks-box">
+                        <div class="perk-item">⚡ <strong>Fast PIN Login:</strong> Set a 6-digit PIN once, login in 1 second!</div>
+                        <div class="perk-item">✨ <strong>Free Trial:</strong> Play every game once (5 quizzes each)</div>
+                        <div class="perk-item">💬 <strong>WhatsApp Delivery:</strong> Instant 4-digit OTP via MSG91</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: PIN Login for Existing Users -->
+            <div id="authStepPin" class="auth-step-panel hidden">
+                <div class="modal-header">
+                    <div class="auth-header-icon">🔐</div>
+                    <h2 class="modal-title">Enter 6-Digit PIN</h2>
+                    <p class="modal-subtitle">Welcome back, <strong id="pinUserNameDisplay">Bollywood Fan</strong>!</p>
+                </div>
+
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label for="authLoginPinInput" class="form-label">Your 6-Digit PIN</label>
+                        <input type="password" id="authLoginPinInput" class="form-input form-input-otp" placeholder="• • • • • •" maxlength="6" inputmode="numeric" autocomplete="current-password">
+                    </div>
+
+                    <div id="authPinErrorMsg" class="auth-error-banner hidden"></div>
+
+                    <button type="button" id="btnLoginPin" class="btn-modal-submit" onclick="authManager.loginWithPin()">
+                        <span>🔓 Unlock &amp; Start Playing</span>
+                    </button>
+
+                    <div class="otp-resend-row mt-3">
+                        <button type="button" class="btn-text-action" onclick="authManager.handleForgotPin()">Forgot PIN? Reset via WhatsApp OTP</button>
+                    </div>
+
+                    <div class="change-number-row mt-2">
+                        <button type="button" class="btn-link" onclick="authManager.showAuthModal()">← Use a different mobile number</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: 4-Digit OTP Verification (Sign Up / Forgot PIN) -->
+            <div id="authStepOtp" class="auth-step-panel hidden">
+                <div class="modal-header">
+                    <div class="auth-header-icon">💬</div>
+                    <h2 class="modal-title">Enter 4-Digit OTP</h2>
+                    <p class="modal-subtitle">We sent a 4-digit code to <strong id="otpSentPhoneDisplay">+91-XXXXXXXXXX</strong> <span id="otpChannelDisplayBadge" class="otp-channel-tag">💬 on WhatsApp / SMS</span></p>
+                </div>
+
+                <div id="devOtpBanner" class="dev-otp-card hidden"></div>
+
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label for="authOtpInput" class="form-label">4-Digit Verification Code</label>
+                        <input type="text" id="authOtpInput" class="form-input form-input-otp" placeholder="1 2 3 4" maxlength="4" inputmode="numeric" autocomplete="one-time-code">
+                    </div>
+
+                    <div id="authOtpErrorMsg" class="auth-error-banner hidden"></div>
+
+                    <button type="button" id="btnVerifyOtp" class="btn-modal-submit" onclick="authManager.verifyOtp()">
+                        <span>✅ Verify Code &rarr;</span>
+                    </button>
+
+                    <div class="otp-resend-row">
+                        <span>Didn't receive code?</span>
+                        <button type="button" id="btnResendOtp" class="btn-text-action" onclick="authManager.triggerOtpSend(true)" disabled>Resend OTP</button>
+                        <span id="otpTimerCountdown" class="timer-countdown">(60s)</span>
+                    </div>
+
+                    <div class="change-number-row">
+                        <button type="button" class="btn-link" onclick="authManager.showAuthModal()">← Change Mobile Number</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Set / Reset 6-Digit PIN -->
+            <div id="authStepSetPin" class="auth-step-panel hidden">
+                <div class="modal-header">
+                    <div class="auth-header-icon">✨</div>
+                    <h2 class="modal-title" id="authSetPinTitle">Create Your 6-Digit PIN</h2>
+                    <p class="modal-subtitle">You will use this 6-digit PIN to login instantly next time!</p>
+                </div>
+
+                <div class="auth-form">
+                    <div class="form-group" id="authNewNameGroup">
+                        <label for="authNewNameInput" class="form-label">Your Name <span class="label-optional">(Optional)</span></label>
+                        <input type="text" id="authNewNameInput" class="form-input" placeholder="e.g. Rahul Sharma" maxlength="40" autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="authNewPinInput" class="form-label">Create 6-Digit PIN</label>
+                        <input type="password" id="authNewPinInput" class="form-input form-input-otp" placeholder="• • • • • •" maxlength="6" inputmode="numeric" autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="authConfirmPinInput" class="form-label">Confirm 6-Digit PIN</label>
+                        <input type="password" id="authConfirmPinInput" class="form-input form-input-otp" placeholder="• • • • • •" maxlength="6" inputmode="numeric" autocomplete="new-password">
+                    </div>
+
+                    <div id="authSetPinErrorMsg" class="auth-error-banner hidden"></div>
+
+                    <button type="button" id="btnSaveNewPin" class="btn-modal-submit" onclick="authManager.saveNewPin()">
+                        <span>💾 Save PIN &amp; Start Playing</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL 2: UPGRADE PAYWALL (1 DAY, 7 DAYS, 1 MONTH PLANS)
+         ============================================================ -->
+    <div id="upgradeModal" class="modal-overlay">
+        <div class="modal-dialog upgrade-modal-dialog">
+            <button type="button" class="btn-modal-close" onclick="authManager.hideUpgradeModal()" title="Close">&times;</button>
+            
+            <div class="upgrade-header">
+                <div class="upgrade-badge">💎 BOLLYWOOD ARCADE PRO</div>
+                <h2 id="upgradeModalTitle" class="upgrade-title">Unlock Unlimited Filmi Fun!</h2>
+                <p id="upgradeModalDesc" class="upgrade-desc">Free trial is limited to 1 play &amp; 5 quizzes per game. Choose a pass to unlock unlimited plays, all 10, 15 &amp; 20 quiz options, and big-screen TV mode!</p>
+            </div>
+
+            <!-- Pricing Cards Grid -->
+            <div class="pricing-grid">
+                <!-- 1 Day Pass -->
+                <div class="plan-card" onclick="authManager.buyPlan('1day')">
+                    <div class="plan-card-tag">PARTY PASS</div>
+                    <h3 class="plan-title">1 Day Pass</h3>
+                    <div class="plan-price">
+                        <span class="currency">₹</span>
+                        <span class="amount">499</span>
+                        <span class="period">/ 24 Hours</span>
+                    </div>
+                    <p class="plan-summary">Perfect for tonight's family or friends game night!</p>
+                    <ul class="plan-features">
+                        <li><span>✓</span> All 7 Games Unlocked</li>
+                        <li><span>✓</span> Unlimited Replays</li>
+                        <li><span>✓</span> All Quiz Rounds (10, 15, 20)</li>
+                        <li><span>✓</span> Big-Screen TV / Projector Mode</li>
+                    </ul>
+                    <button type="button" class="btn-plan-action">Activate for ₹499</button>
+                </div>
+
+                <!-- 7 Days Pass (Popular) -->
+                <div class="plan-card plan-featured" onclick="authManager.buyPlan('7days')">
+                    <div class="plan-badge-featured">🔥 MOST POPULAR</div>
+                    <div class="plan-card-tag">WEEKLY PASS</div>
+                    <h3 class="plan-title">7 Days Pass</h3>
+                    <div class="plan-price">
+                        <span class="currency">₹</span>
+                        <span class="amount">1,999</span>
+                        <span class="period">/ 7 Days</span>
+                    </div>
+                    <div class="plan-per-day">Only ₹285 / day</div>
+                    <p class="plan-summary">A full week of non-stop Bollywood music &amp; trivia excitement!</p>
+                    <ul class="plan-features">
+                        <li><span>✓</span> All 7 Games Unlocked</li>
+                        <li><span>✓</span> Unlimited Replays &amp; Rounds</li>
+                        <li><span>✓</span> Authentic Audio &amp; Video Clips</li>
+                        <li><span>✓</span> TV Mode &amp; Fast Peeking Controls</li>
+                    </ul>
+                    <button type="button" class="btn-plan-action btn-plan-highlight">Activate for ₹1,999</button>
+                </div>
+
+                <!-- 1 Month Pass -->
+                <div class="plan-card" onclick="authManager.buyPlan('1month')">
+                    <div class="plan-card-tag">VIP PASS</div>
+                    <h3 class="plan-title">1 Month VIP</h3>
+                    <div class="plan-price">
+                        <span class="currency">₹</span>
+                        <span class="amount">4,999</span>
+                        <span class="period">/ 30 Days</span>
+                    </div>
+                    <div class="plan-per-day">Only ₹166 / day</div>
+                    <p class="plan-summary">For true Bollywood enthusiasts and weekend party hosts!</p>
+                    <ul class="plan-features">
+                        <li><span>✓</span> All 7 Games Unlocked for 30 Days</li>
+                        <li><span>✓</span> 100% Unlimited Plays &amp; Rounds</li>
+                        <li><span>✓</span> Complete Stanza &amp; Dialogue Audio</li>
+                        <li><span>✓</span> Best Value (Save over 70%)</li>
+                    </ul>
+                    <button type="button" class="btn-plan-action">Activate for ₹4,999</button>
+                </div>
+            </div>
+
+            <div class="upgrade-footer-note">
+                🔒 Instant activation via UPI / Card &bull; Automatically reverts to Free when pass expires &bull; Zero auto-debit hassle
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL 3: ADMIN MANAGEMENT DASHBOARD & REPORTING
+         ============================================================ -->
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-dialog admin-modal-dialog">
+            <button type="button" class="btn-modal-close" onclick="authManager.hideAdminModal()" title="Close">&times;</button>
+            
+            <div class="admin-modal-header">
+                <div class="admin-title-wrap">
+                    <span class="admin-crown-icon">👑</span>
+                    <div>
+                        <h2 class="admin-modal-title">Admin Management Console</h2>
+                        <p class="admin-modal-subtitle">User accounts, subscription controls &amp; game usage analytics</p>
+                    </div>
+                </div>
+
+                <!-- Tab Switchers -->
+                <div class="admin-nav-tabs">
+                    <button type="button" class="admin-tab-btn active" data-tab="stats" onclick="authManager.switchAdminTab('stats')">
+                        📊 Overview &amp; Usage
+                    </button>
+                    <button type="button" class="admin-tab-btn" data-tab="users" onclick="authManager.switchAdminTab('users')">
+                        👥 Users &amp; Subscriptions
+                    </button>
+                    <button type="button" class="admin-tab-btn" data-tab="msg91" onclick="authManager.switchAdminTab('msg91')">
+                        💬 MSG91 &amp; WhatsApp
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab 1: Stats & Overview -->
+            <div id="adminTabStats" class="admin-tab-content">
+                <div class="admin-kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">👥</div>
+                        <div class="kpi-value" id="adminTotalUsers">0</div>
+                        <div class="kpi-label">Total Users</div>
+                    </div>
+                    <div class="kpi-card kpi-paid">
+                        <div class="kpi-icon">💎</div>
+                        <div class="kpi-value" id="adminPaidUsers">0</div>
+                        <div class="kpi-label">Paid Subscribers</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🆓</div>
+                        <div class="kpi-value" id="adminFreeUsers">0</div>
+                        <div class="kpi-label">Free Users</div>
+                    </div>
+                    <div class="kpi-card kpi-revenue">
+                        <div class="kpi-icon">💰</div>
+                        <div class="kpi-value" id="adminTotalRevenue">₹0</div>
+                        <div class="kpi-label">Total Revenue</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🎮</div>
+                        <div class="kpi-value" id="adminTotalPlays">0</div>
+                        <div class="kpi-label">Total Game Plays</div>
+                    </div>
+                </div>
+
+                <div class="admin-analytics-section">
+                    <h3 class="admin-section-heading">🔥 Game Popularity &amp; Usage</h3>
+                    <div id="adminGamePlaysList" class="admin-game-plays-container">
+                        <!-- Populated dynamically by authManager -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: User Subscriptions Management -->
+            <div id="adminTabUsers" class="admin-tab-content hidden">
+                <div class="admin-user-toolbar">
+                    <div class="user-search-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="adminUserSearchInput" class="admin-search-input" placeholder="Search by mobile or name..." oninput="authManager.loadAdminUsers()">
+                    </div>
+                    <div class="user-filter-wrap">
+                        <label for="adminUserPlanFilter" class="filter-label">Filter:</label>
+                        <select id="adminUserPlanFilter" class="admin-select" onchange="authManager.loadAdminUsers(this.value)">
+                            <option value="all">All Plans</option>
+                            <option value="paid">💎 Paid Only</option>
+                            <option value="free">🆓 Free Only</option>
+                        </select>
+                        <button type="button" class="btn-refresh" onclick="authManager.loadAdminUsers()" title="Refresh Users">🔄</button>
+                    </div>
+                </div>
+
+                <div class="admin-table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Mobile</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Plan</th>
+                                <th>Expiry / Remaining</th>
+                                <th>Plays</th>
+                                <th>Manage Subscription</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: MSG91 & WhatsApp Settings -->
+            <div id="adminTabMsg91" class="admin-tab-content hidden">
+                <div class="msg91-admin-banner">
+                    <div class="msg91-status-indicator" id="msg91StatusIndicator">
+                        <span class="status-dot status-inactive" id="msg91StatusDot"></span>
+                        <span class="status-text" id="msg91StatusText">MSG91 Service: Not Configured (Using Built-in Mock Mode)</span>
+                    </div>
+                    <p class="msg91-desc">
+                        Connect your MSG91 account to deliver real-time OTPs to users directly on <strong>WhatsApp</strong> (with SMS fallback).
+                    </p>
+                </div>
+
+                <div class="admin-config-card">
+                    <h3 class="admin-section-heading">⚙️ MSG91 Credentials</h3>
+                    
+                    <div class="form-group mb-4">
+                        <label class="toggle-control">
+                            <input type="checkbox" id="msg91EnabledToggle">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text"><strong>Enable Live MSG91 OTP Delivery</strong> (Unchecked = Mock Dev OTP)</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="msg91AuthkeyInput" class="form-label">MSG91 Authkey (API Key)</label>
+                        <div class="input-with-action">
+                            <input type="password" id="msg91AuthkeyInput" class="form-input" placeholder="e.g. 419647ABcXyz...">
+                            <button type="button" class="btn-toggle-eye" onclick="authManager.toggleAuthkeyVisibility()" title="Show/Hide">👁️</button>
+                        </div>
+                        <span class="form-hint">Found under MSG91 Panel &rarr; Authkey</span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="msg91WidgetIdInput" class="form-label">MSG91 OTP Widget ID</label>
+                        <input type="text" id="msg91WidgetIdInput" class="form-input" placeholder="e.g. 3461626f3333333830303831">
+                        <span class="form-hint">Unique 32-character Widget ID created in MSG91 Panel &rarr; OTP &rarr; Create Widget</span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="msg91TokenAuthInput" class="form-label">Widget Token Auth (Client Token - Optional)</label>
+                        <input type="text" id="msg91TokenAuthInput" class="form-input" placeholder="e.g. 419... tokenAuth for frontend widget">
+                        <span class="form-hint">Required only if embedding the client-side MSG91 OTP popup widget</span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="msg91ChannelSelect" class="form-label">Primary Delivery Channel</label>
+                        <select id="msg91ChannelSelect" class="admin-select">
+                            <option value="whatsapp" selected>💬 WhatsApp (Primary) with SMS Fallback</option>
+                            <option value="sms">📱 SMS (Default)</option>
+                        </select>
+                    </div>
+
+                    <div id="msg91SaveAlert" class="auth-error-banner hidden"></div>
+
+                    <button type="button" class="btn-modal-submit" id="btnSaveMsg91" onclick="authManager.saveAdminMsg91Settings()">
+                        <span>💾 Save MSG91 Settings</span>
+                    </button>
+                </div>
+
+                <!-- Test Connection Card -->
+                <div class="admin-config-card mt-4">
+                    <h3 class="admin-section-heading">📲 Test WhatsApp OTP Delivery</h3>
+                    <p class="section-subtext">Send a real test OTP to your mobile number to verify that your MSG91 WhatsApp routing is working properly.</p>
+                    
+                    <div class="test-send-row">
+                        <div class="input-with-prefix flex-grow">
+                            <span class="input-prefix">🇮🇳 +91</span>
+                            <input type="tel" id="msg91TestMobileInput" class="form-input" placeholder="Enter 10-digit mobile" maxlength="10">
+                        </div>
+                        <button type="button" class="btn-test-action" id="btnSendTestOtp" onclick="authManager.testAdminMsg91Otp()">
+                            <span>📲 Send Test OTP</span>
+                        </button>
+                    </div>
+
+                    <div id="msg91TestResultBox" class="test-result-box hidden"></div>
+                </div>
+
+                <!-- Help Reference Card -->
+                <div class="admin-help-box mt-4">
+                    <div class="help-box-header">
+                        <span class="help-icon">📖</span>
+                        <strong>How to setup MSG91 WhatsApp OTP in 2 minutes:</strong>
+                    </div>
+                    <ol class="help-steps-list">
+                        <li>Log in to your <a href="https://msg91.com" target="_blank" rel="noopener">MSG91 Panel</a> and navigate to the <strong>OTP</strong> section.</li>
+                        <li>Click <strong>Create New Widget</strong> (or Edit your existing Widget) and choose Verification Type: <strong>Login using OTP</strong>.</li>
+                        <li>Under Primary Channel, select <strong>WhatsApp</strong> (with SMS fallback).</li>
+                        <li><strong>Important for Direct In-App OTP:</strong> In your Widget Settings, toggle <strong>OFF</strong> <em>"Google re-CAPTCHA validation"</em> so that OTPs can be sent directly from the custom arcade screen without a captcha block. (If kept ON, players can use the "Verify with MSG91 OTP Widget" popup button).</li>
+                        <li>Copy the generated <strong>Widget ID</strong> and your account <strong>Authkey</strong> (from MSG91 Left Menu &rarr; Authkey) into the fields above and hit <strong>Save</strong>!</li>
+                    </ol>
+                    <p class="help-link-wrap">
+                        Official Guide: <a href="https://msg91.com/help/sendotp/how-to-integrate-the-new-login-with-otp-widget" target="_blank" rel="noopener">How to integrate the new login with OTP widget &rarr;</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Confetti canvas -->
     <canvas id="confettiCanvas"></canvas>
 
-    <script src="game.js?v=5.2"></script>
-    <script src="party_games.js?v=5.2"></script>
+    <!-- MSG91 Official OTP Widget SDK -->
+    <script type="text/javascript" src="https://verify.msg91.com/otp-provider.js"></script>
+
+    <script src="auth_client.js?v=5.5"></script>
+    <script src="game.js?v=5.5"></script>
+    <script src="party_games.js?v=5.5"></script>
 </body>
 </html>

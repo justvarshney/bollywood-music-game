@@ -180,6 +180,13 @@ function updateStartScreenMode(mode = 'intro') {
 
 // Expose openMusicGame globally with mode selection
 window.openMusicGame = function (mode = 'intro') {
+    if (window.authManager && window.authManager.hasUsedFreeTrial(mode)) {
+        window.authManager.showUpgradeModal('game_limit', {
+            title: 'Free Trial Completed',
+            desc: 'You have already enjoyed your free trial for this game! Upgrade to a Paid Pass to play unlimited times across all 7 Bollywood games.'
+        });
+        return;
+    }
     updateStartScreenMode(mode);
     showScreen(startScreen);
 };
@@ -194,14 +201,15 @@ function updateSongCountOptions() {
     
     if (total === 0) return;
 
-    const countOptions = [5, 10, 20, 30].filter(n => n < total);
-    if (!countOptions.includes(total)) countOptions.push(total);
+    const isPaid = window.authManager && window.authManager.isPaid();
+    const countOptions = [5, 10, 15, 20];
+    const defaultVal = isPaid ? 10 : 5;
 
     countOptions.forEach(n => {
         const opt = document.createElement('option');
         opt.value = n;
-        opt.textContent = n === total ? `All ${total} Songs` : `${n} Songs`;
-        if (n === Math.min(10, total)) opt.selected = true;
+        opt.textContent = `${n} Songs`;
+        if (n === defaultVal) opt.selected = true;
         select.appendChild(opt);
     });
 
@@ -210,28 +218,35 @@ function updateSongCountOptions() {
     if (!pillsContainer) return;
     pillsContainer.innerHTML = '';
 
-    const pillValues = [5, 10, 20, 30].filter(n => n <= total);
-    if (!pillValues.includes(total)) pillValues.push('all');
-
-    pillValues.forEach(val => {
+    countOptions.forEach(val => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'count-pill';
         btn.dataset.count = val;
-        btn.textContent = val === 'all' ? `All (${total})` : val;
+        btn.textContent = val;
         
-        const isDefault = (val === 10 || (val === total && total < 10));
-        if (isDefault) btn.classList.add('active');
+        if (val === defaultVal) btn.classList.add('active');
 
         btn.addEventListener('click', () => {
             triggerHaptic('tap');
+            if (window.authManager && !window.authManager.isPaid() && val !== 5) {
+                window.authManager.showUpgradeModal('rounds_limit', {
+                    title: 'Unlock ' + val + ' Songs',
+                    desc: 'Free trial includes up to <strong>5 songs</strong> per quiz. Upgrade to a Paid Pass to unlock <strong>10, 15, and 20 songs</strong>!'
+                });
+                return;
+            }
             pillsContainer.querySelectorAll('.count-pill').forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
-            select.value = val === 'all' ? total : val;
+            select.value = val;
         });
 
         pillsContainer.appendChild(btn);
     });
+
+    if (window.authManager && typeof window.authManager.updateRoundPillsUI === 'function') {
+        window.authManager.updateRoundPillsUI();
+    }
 }
 
 // ---- Background Particles ----
@@ -354,14 +369,21 @@ function shuffleArray(arr) {
 }
 
 // ---- Start Game ----
-function startGame() {
+async function startGame() {
     const activeData = getActiveAudioDataset();
     if (activeData.length === 0) return;
     triggerHaptic('tap');
 
-    ensureAudioUnlocked();
-
     const count = parseInt($('songCount').value) || 10;
+    const mode = gameState.gameMode || 'intro';
+
+    // Multi-user & Free vs Paid Validation
+    if (window.authManager && typeof window.authManager.checkCanPlay === 'function') {
+        const allowed = await window.authManager.checkCanPlay(mode, count);
+        if (!allowed) return;
+    }
+
+    ensureAudioUnlocked();
     gameState.totalSongs = Math.min(count, activeData.length);
     gameState.currentSongIndex = 0;
     gameState.score = 0;

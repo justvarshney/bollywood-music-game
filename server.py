@@ -3,6 +3,7 @@
 Bollywood Music Quiz Server
 - HTTP Range requests for seamless audio seeking
 - Client identification logging: IP, Location, Device type & Browser
+- User Management, Mobile OTP Authentication, Subscription Paywall & Admin APIs
 - CORS & Cache-Control headers
 """
 
@@ -16,6 +17,9 @@ import json
 import urllib.request
 import urllib.parse
 import threading
+
+import auth_db
+import msg91_service
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
 
@@ -165,6 +169,43 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         except Exception:
             super().log_message(format, *args)
 
+    def send_json(self, status_code, payload):
+        """Helper to return JSON response with proper headers."""
+        body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        self.send_response(status_code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def get_bearer_token(self):
+        """Extract session token from Authorization header or custom header."""
+        auth_hdr = self.headers.get('Authorization', '')
+        if auth_hdr.startswith('Bearer '):
+            return auth_hdr[7:].strip()
+        custom = self.headers.get('X-Auth-Token', '')
+        if custom:
+            return custom.strip()
+        return None
+
+    def get_authenticated_user(self):
+        """Resolves user from token, automatically checking subscription expiration."""
+        token = self.get_bearer_token()
+        if not token:
+            return None
+        return auth_db.get_user_by_token(token)
+
+    def read_json_body(self):
+        """Safely parse incoming JSON body."""
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            if length == 0:
+                return {}
+            raw = self.rfile.read(length).decode('utf-8')
+            return json.loads(raw)
+        except Exception:
+            return {}
+
     def do_GET(self):
         # Serve favicon.ico safely if requested
         if self.path == '/favicon.ico' and not os.path.isfile('favicon.ico'):
@@ -172,12 +213,339 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
 
-        # Check if this is a range request
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        query = urllib.parse.parse_qs(parsed.query)
+
+        # ----------------------------------------------------
+        # REST API GET Routes
+        # ----------------------------------------------------
+        if path.startswith('/api/'):
+            # 1. Current User Profile
+            if path == '/api/auth/me':
+                user = self.get_authenticated_user()
+                if not user:
+                    self.send_json(401, {"status": "error", "message": "Not authenticated", "user": None})
+                    return
+                plays = auth_db.get_user_game_plays(user["id"])
+                self.send_json(200, {
+                    "status": "success",
+                    "user": user,
+                    "game_plays": plays,
+                    "plans": auth_db.PLAN_CONFIGS
+                })
+                return
+
+            # 2. Available Subscription Plans
+            elif path == '/api/subscription/plans':
+                self.send_json(200, {
+                    "status": "success",
+                    "plans": auth_db.PLAN_CONFIGS
+                })
+                return
+
+            # 3. Admin: Dashboard Stats & Analytics
+            elif path == '/api/admin/stats':
+                user = self.get_authenticated_user()
+                if not user or user.get("role") != "admin":
+                    self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                    return
+                stats = auth_db.get_admin_dashboard_stats()
+                self.send_json(200, {"status": "success", "stats": stats})
+                return
+
+            # 4. Admin: User List
+            elif path == '/api/admin/users':
+                user = self.get_authenticated_user()
+                if not user or user.get("role") != "admin":
+                    self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                    return
+                q = query.get("q", [""])[0]
+                plan_filter = query.get("plan", ["all"])[0]
+                limit = int(query.get("limit", [100])[0])
+                users = auth_db.get_admin_user_list(search_query=q, plan_filter=plan_filter, limit=limit)
+                self.send_json(200, {"status": "success", "users": users})
+                return
+
+            # 5. Public MSG91 Client Config
+            elif path == '/api/auth/msg91-config':
+                cfg = msg91_service.get_public_client_config()
+                self.send_json(200, {"status": "success", "config": cfg})
+                return
+
+            # 6. Admin: MSG91 Settings
+            elif path == '/api/admin/msg91-settings':
+                user = self.get_authenticated_user()
+                if not user or user.get("role") != "admin":
+                    self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                    return
+                settings = msg91_service.get_admin_masked_config()
+                self.send_json(200, {"status": "success", "settings": settings, "config": settings})
+                return
+
+            else:
+                self.send_json(404, {"status": "error", "message": f"API endpoint not found: {path}"})
+                return
+
+        # Check if this is a range request for media streaming
         range_header = self.headers.get('Range')
         if range_header:
             self.handle_range_request(range_header)
         else:
             super().do_GET()
+
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        if not path.startswith('/api/'):
+            self.send_error(404, 'Endpoint not found')
+            return
+
+        body = self.read_json_body()
+
+        # ----------------------------------------------------
+        # REST API POST Routes
+        # ----------------------------------------------------
+        # 0. Check Mobile: Determines if user exists and if PIN is configured
+        if path == '/api/auth/check-mobile':
+            mobile = body.get('mobile', '')
+            ok, msg, data = auth_db.check_mobile(mobile)
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "message": msg,
+                "data": data
+            })
+            return
+
+        # 0.1 Login with 6-Digit PIN
+        elif path == '/api/auth/login-pin':
+            mobile = body.get('mobile', '')
+            pin = body.get('pin', '')
+            ok, msg, token, user = auth_db.login_with_pin(mobile, pin)
+            if ok:
+                plays = auth_db.get_user_game_plays(user["id"])
+                self.send_json(200, {
+                    "status": "success",
+                    "message": msg,
+                    "token": token,
+                    "user": user,
+                    "game_plays": plays
+                })
+            else:
+                self.send_json(400, {"status": "error", "message": msg})
+            return
+
+        # 0.2 Set / Reset 6-Digit PIN
+        elif path == '/api/auth/set-pin':
+            mobile = body.get('mobile', '')
+            pin = body.get('pin', '')
+            name = body.get('name', '')
+            ok, msg, token, user = auth_db.set_user_pin(mobile, pin, name)
+            if ok:
+                plays = auth_db.get_user_game_plays(user["id"])
+                self.send_json(200, {
+                    "status": "success",
+                    "message": msg,
+                    "token": token,
+                    "user": user,
+                    "game_plays": plays
+                })
+            else:
+                self.send_json(400, {"status": "error", "message": msg})
+            return
+
+        # 1. Send OTP for Mobile Signup / Login / PIN Reset
+        elif path == '/api/auth/send-otp':
+            mobile = body.get('mobile', '')
+            name = body.get('name', '')
+            ok, msg, dev_otp = auth_db.send_otp(mobile, name)
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "message": msg,
+                "dev_otp": dev_otp
+            })
+            return
+
+        # 2. Verify OTP & Issue Session Token
+        elif path == '/api/auth/verify-otp':
+            mobile = body.get('mobile', '')
+            otp = body.get('otp', '')
+            name = body.get('name', '')
+            ok, msg, token, user, needs_pin = auth_db.verify_otp(mobile, otp, name)
+            if ok:
+                plays = auth_db.get_user_game_plays(user["id"])
+                self.send_json(200, {
+                    "status": "success",
+                    "message": msg,
+                    "token": token,
+                    "user": user,
+                    "needs_pin": needs_pin,
+                    "game_plays": plays
+                })
+            else:
+                self.send_json(400, {"status": "error", "message": msg})
+            return
+
+        # 3. Logout
+        elif path == '/api/auth/logout':
+            token = self.get_bearer_token()
+            auth_db.logout_session(token)
+            self.send_json(200, {"status": "success", "message": "Logged out successfully"})
+            return
+
+        # 4. Record Game Play & Enforce Free / Paid Paywall Rules
+        elif path == '/api/game/record-play':
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json(401, {
+                    "status": "error",
+                    "code": "UNAUTHORIZED",
+                    "message": "Please sign in with your mobile number to play!"
+                })
+                return
+
+            game_id = body.get('gameId', '')
+            rounds = int(body.get('rounds', 5))
+
+            allowed, code, msg, meta = auth_db.record_game_play(user["id"], game_id, rounds)
+            if allowed:
+                updated_user = auth_db.get_user_by_id(user["id"])
+                plays = auth_db.get_user_game_plays(user["id"])
+                self.send_json(200, {
+                    "status": "success",
+                    "allowed": True,
+                    "message": msg,
+                    "meta": meta,
+                    "user": updated_user,
+                    "game_plays": plays
+                })
+            else:
+                self.send_json(403, {
+                    "status": "error",
+                    "code": code,
+                    "allowed": False,
+                    "message": msg,
+                    "meta": meta
+                })
+            return
+
+        # 5. Upgrade Subscription to Paid Plan
+        elif path == '/api/subscription/upgrade':
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json(401, {"status": "error", "message": "Please sign in to upgrade"})
+                return
+
+            plan_id = body.get('plan', '')
+            payment_method = body.get('paymentMethod', 'UPI')
+            ok, msg, updated_user = auth_db.upgrade_subscription(user["id"], plan_id, payment_method)
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "message": msg,
+                "user": updated_user
+            })
+            return
+
+        # 6. Admin Action: Modify Any User's Plan, Role, or Status
+        elif path == '/api/admin/update-user':
+            admin_user = self.get_authenticated_user()
+            if not admin_user or admin_user.get("role") != "admin":
+                self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                return
+
+            target_id = body.get('targetUserId')
+            new_plan = body.get('plan')
+            custom_days = body.get('customDays')
+            new_role = body.get('role')
+            new_status = body.get('status')
+
+            ok, msg, updated = auth_db.admin_update_user(
+                admin_user_id=admin_user["id"],
+                target_user_id=target_id,
+                new_plan=new_plan,
+                custom_days=custom_days,
+                new_role=new_role,
+                new_status=new_status
+            )
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "message": msg,
+                "user": updated
+            })
+            return
+
+        # 7. Verify Client MSG91 Widget Access Token
+        elif path == '/api/auth/msg91-verify-token':
+            access_token = body.get('accessToken', '')
+            name = body.get('name', '')
+            ok, msg, token, user = auth_db.verify_msg91_access_token(access_token, name)
+            if ok:
+                plays = auth_db.get_user_game_plays(user["id"])
+                self.send_json(200, {
+                    "status": "success",
+                    "message": msg,
+                    "token": token,
+                    "user": user,
+                    "game_plays": plays
+                })
+            else:
+                self.send_json(400, {"status": "error", "message": msg})
+            return
+
+        # 8. Admin Save MSG91 Settings
+        elif path == '/api/admin/msg91-settings':
+            admin_user = self.get_authenticated_user()
+            if not admin_user or admin_user.get("role") != "admin":
+                self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                return
+
+            ok, msg = msg91_service.save_config(body)
+            masked = msg91_service.get_admin_masked_config()
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "message": msg,
+                "settings": masked,
+                "config": masked
+            })
+            return
+
+        # 9. Admin Test MSG91 WhatsApp OTP
+        elif path == '/api/admin/msg91-test':
+            admin_user = self.get_authenticated_user()
+            if not admin_user or admin_user.get("role") != "admin":
+                self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                return
+
+            test_mobile = body.get('mobile', admin_user.get('mobile', ''))
+            ok, msg, req_id = msg91_service.send_otp_via_msg91(test_mobile)
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "success": ok,
+                "message": msg,
+                "req_id": req_id,
+                "reqId": req_id
+            })
+            return
+
+        # 10. Admin Delete User
+        elif path == '/api/admin/delete-user':
+            admin_user = self.get_authenticated_user()
+            if not admin_user or admin_user.get("role") != "admin":
+                self.send_json(403, {"status": "error", "message": "Admin authorization required"})
+                return
+
+            target_user_id = int(body.get('targetUserId', 0))
+            ok, msg = auth_db.admin_delete_user(admin_user["id"], target_user_id)
+            self.send_json(200 if ok else 400, {
+                "status": "success" if ok else "error",
+                "message": msg
+            })
+            return
+
+        else:
+            self.send_json(404, {"status": "error", "message": f"API endpoint not found: {path}"})
+            return
 
     def handle_range_request(self, range_header):
         path = self.translate_path(self.path)
@@ -231,6 +599,10 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_HEAD(self):
         """Handle HEAD requests."""
         path = self.translate_path(self.path)
+        if os.path.isdir(path):
+            index_path = os.path.join(path, 'index.html')
+            if os.path.isfile(index_path):
+                path = index_path
         if os.path.isfile(path):
             file_size = os.path.getsize(path)
             content_type = self.guess_type(path)
@@ -252,8 +624,8 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Range support and CORS
         self.send_header('Accept-Ranges', 'bytes')
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Range, Content-Type')
+        self.send_header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST')
+        self.send_header('Access-Control-Allow-Headers', 'Range, Content-Type, Authorization, X-Auth-Token')
         # Prevent caching for instant updates
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
