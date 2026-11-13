@@ -379,7 +379,7 @@ async function startGame() {
 
     // Multi-user & Free vs Paid Validation
     if (window.authManager && typeof window.authManager.checkCanPlay === 'function') {
-        const allowed = await window.authManager.checkCanPlay(mode, count);
+        const allowed = await window.authManager.checkCanPlay(mode, count, () => startGame());
         if (!allowed) return;
     }
 
@@ -1121,6 +1121,12 @@ function launchConfetti() {
 // ======================================================
 
 document.addEventListener('keydown', (e) => {
+    // Ignore all keyboard shortcuts when typing inside form fields or inputs
+    const targetTag = (e.target && e.target.tagName) ? e.target.tagName : (document.activeElement ? document.activeElement.tagName : '');
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(targetTag) || (e.target && e.target.isContentEditable)) {
+        return;
+    }
+
     const key = e.key.toLowerCase();
 
     // Global Display Shortcuts

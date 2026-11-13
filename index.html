@@ -33,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=5.4">
+    <link rel="stylesheet" href="style.css?v=6.0">
 </head>
 <body>
     <!-- Animated background particles -->
@@ -70,6 +70,30 @@
                     </button>
                 </div>
             </header>
+
+            <!-- Online Multiplayer Hero Action Card -->
+            <div class="hub-multiplayer-hero" onclick="multiplayerClient.openCreateModal()">
+                <div class="mp-hero-glow"></div>
+                <div class="mp-hero-inner">
+                    <div class="mp-hero-badge">🌐 NEW &bull; PLAY REMOTELY WITH FRIENDS</div>
+                    <div class="mp-hero-main">
+                        <div class="mp-hero-icon-group">
+                            <span class="mp-hero-main-icon">🎮</span>
+                            <span class="mp-hero-avatars">💃 🕶️ 👑</span>
+                        </div>
+                        <div class="mp-hero-text">
+                            <h2 class="mp-hero-title">Online Multiplayer Battle</h2>
+                            <p class="mp-hero-desc">Create a room, share personal WhatsApp links with friends in different cities, and compete live with synchronized 4-option buzzers and live scoreboards!</p>
+                        </div>
+                        <div class="mp-hero-action">
+                            <button type="button" class="btn-mp-hero-launch">
+                                <span>🚀 Host Game &amp; Share Links</span>
+                                <span class="arrow-icon">&rarr;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Games Grid -->
             <div class="hub-games-grid">
@@ -731,6 +755,171 @@
     </div>
 
     <!-- ============================================================
+         SCREEN 8: ONLINE MULTIPLAYER ARENA (REMOTE LIVE BATTLE)
+         ============================================================ -->
+    <div id="multiplayerArenaScreen" class="screen">
+        <!-- Floating Shout reaction container -->
+        <div id="mpFloatingShoutContainer" class="mp-floating-container"></div>
+
+        <!-- 3-2-1 Countdown Overlay -->
+        <div id="mpCountdownOverlay" class="mp-countdown-overlay">
+            <div class="mp-countdown-box">
+                <div id="mpCountdownNumber" class="mp-countdown-num">3</div>
+                <div id="mpCountdownText" class="mp-countdown-sub">Battle Starting in...</div>
+            </div>
+        </div>
+
+        <div class="arena-content-scroll">
+            <!-- Arena Top Navigation Bar -->
+            <div class="arena-top-nav">
+                <button type="button" class="btn-arena-exit" onclick="multiplayerClient.exitArenaToHub()" title="Leave Multiplayer Room">
+                    &larr; 🏠 Exit Room
+                </button>
+                <div class="arena-center-info">
+                    <span class="arena-room-code-tag">ROOM: <strong id="mpRoomCodeDisplay">---</strong></span>
+                    <span id="mpConnectionBadge" class="mp-conn-badge conn-connecting">Connecting...</span>
+                </div>
+                <div class="arena-player-profile">
+                    <span id="mpMyAvatar" class="arena-my-avatar">🎭</span>
+                    <span id="mpMyName" class="arena-my-name">Player</span>
+                </div>
+            </div>
+
+            <!-- View 1: Lobby View -->
+            <div id="mpView_lobby" class="mp-view active">
+                <div class="mp-lobby-card">
+                    <div class="mp-lobby-header">
+                        <div class="mp-lobby-badge">🎮 MULTIPLAYER LOBBY</div>
+                        <h1 class="mp-lobby-title">Waiting for Friends to Join</h1>
+                        <p id="mpLobbyGameTitle" class="mp-lobby-subtitle">Bollywood Quiz &bull; 10 Rounds</p>
+                    </div>
+
+                    <!-- Player Roster Grid -->
+                    <div class="mp-roster-section">
+                        <div class="roster-header-row">
+                            <span class="roster-heading">Players Connected</span>
+                            <span class="roster-hint">Share WhatsApp links with friends</span>
+                        </div>
+                        <div id="mpPlayerRosterGrid" class="mp-roster-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Action Area -->
+                    <div class="mp-lobby-actions">
+                        <button type="button" id="mpPlayerReadyBtn" class="btn-mp-primary btn-mp-ready" onclick="multiplayerClient.setPlayerReady()">
+                            <span>🔊 I'm Ready! (Enable Sound)</span>
+                        </button>
+                        <button type="button" id="mpHostStartBtn" class="btn-mp-primary btn-mp-start" style="display:none;" onclick="multiplayerClient.hostStartGame()">
+                            <span>🚀 Start Multiplayer Game!</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 2: Active Question View -->
+            <div id="mpView_question" class="mp-view">
+                <div class="mp-question-card">
+                    <!-- Header with Timer and Round Counter -->
+                    <div class="mp-question-meta-bar">
+                        <div class="mp-meta-left">
+                            <span id="mpQuestionRoundPill" class="mp-pill mp-round-pill">Round 1 of 10</span>
+                            <span id="mpQuestionCategoryPill" class="mp-pill mp-cat-pill">Filmi Dialogue</span>
+                        </div>
+                        <div class="mp-timer-box">
+                            <span id="mpTimerText" class="mp-timer-text">15s</span>
+                        </div>
+                    </div>
+
+                    <!-- Timer Bar Fill -->
+                    <div class="mp-timer-bar-track">
+                        <div id="mpTimerBarFill" class="mp-timer-bar-fill"></div>
+                    </div>
+
+                    <!-- Media Box (Audio / Video / Image / Emojis) -->
+                    <div id="mpQuestionMediaContainer" class="mp-media-container"></div>
+
+                    <!-- Prompt & Subtitle -->
+                    <div class="mp-prompt-box">
+                        <h2 id="mpQuestionPrompt" class="mp-question-prompt">Loading question...</h2>
+                        <p id="mpQuestionSubtitle" class="mp-question-sub"></p>
+                    </div>
+
+                    <!-- 4 Options Grid -->
+                    <div id="mpOptionsGrid" class="mp-options-grid"></div>
+
+                    <!-- Real-time Tracker & Shout Reactions -->
+                    <div class="mp-question-footer">
+                        <div id="mpAnswerTrackerPill" class="answer-tracker-pill">Waiting for answers...</div>
+                        <div class="mp-shout-bar">
+                            <span class="shout-label">Cheer / Taunt:</span>
+                            <button type="button" class="btn-shout" onclick="multiplayerClient.sendShout('🔥')">🔥</button>
+                            <button type="button" class="btn-shout" onclick="multiplayerClient.sendShout('💃')">💃</button>
+                            <button type="button" class="btn-shout" onclick="multiplayerClient.sendShout('🕶️')">🕶️</button>
+                            <button type="button" class="btn-shout" onclick="multiplayerClient.sendShout('😂')">😂</button>
+                            <button type="button" class="btn-shout" onclick="multiplayerClient.sendShout('🍿')">🍿</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 3: Round Reveal & Live Leaderboard -->
+            <div id="mpView_reveal" class="mp-view">
+                <div class="mp-reveal-card">
+                    <!-- Result Banner (Correct / Wrong / Points) -->
+                    <div id="mpRevealResultBanner" class="mp-reveal-banner"></div>
+
+                    <!-- Trivia / Quote Box -->
+                    <div class="mp-reveal-trivia-box">
+                        <div class="trivia-icon">🎬</div>
+                        <div id="mpRevealTrivia" class="mp-reveal-trivia-text"></div>
+                    </div>
+
+                    <!-- Live Leaderboard Roster -->
+                    <div class="mp-reveal-leaderboard-box">
+                        <div class="lb-header">
+                            <span>🏆 LIVE STANDINGS</span>
+                            <span class="lb-next-hint">Next round starting soon...</span>
+                        </div>
+                        <div id="mpLiveLeaderboardList" class="mp-leaderboard-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 4: Grand Finale Podium -->
+            <div id="mpView_podium" class="mp-view">
+                <div class="mp-podium-card">
+                    <div class="mp-podium-header">
+                        <div class="podium-badge">🏆 GAME OVER</div>
+                        <h1 class="podium-title">Bollywood Champions!</h1>
+                        <p class="podium-subtitle">Here are the final standings and honors:</p>
+                    </div>
+
+                    <!-- 3D Pedestal Stage -->
+                    <div class="podium-stage">
+                        <div id="podium2nd" class="podium-col col-2nd"></div>
+                        <div id="podium1st" class="podium-col col-1st"></div>
+                        <div id="podium3rd" class="podium-col col-3rd"></div>
+                    </div>
+
+                    <!-- Special Filmi Awards List -->
+                    <div id="mpAwardsContainer" class="mp-awards-list"></div>
+
+                    <!-- Action Buttons -->
+                    <div class="mp-podium-actions">
+                        <button type="button" class="btn-mp-primary" onclick="multiplayerClient.openCreateModal()">
+                            <span>🔄 Host Another Battle</span>
+                        </button>
+                        <button type="button" class="btn-mp-secondary" onclick="multiplayerClient.exitArenaToHub()">
+                            <span>🎮 All Games Hub</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
          MODAL 1: AUTHENTICATION (MOBILE NUMBER & OTP LOGIN/SIGNUP)
          ============================================================ -->
     <div id="authModal" class="modal-overlay">
@@ -1156,14 +1345,144 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         MODAL 4: CREATE MULTIPLAYER GAME ROOM
+         ============================================================ -->
+    <div id="multiplayerCreateModal" class="modal-overlay">
+        <div class="modal-dialog mp-create-modal-dialog">
+            <button type="button" class="btn-modal-close" onclick="multiplayerClient.hideCreateModal()" title="Close">&times;</button>
+            <div class="mp-modal-header">
+                <div class="mp-header-icon-wrap">
+                    <span class="mp-header-icon">🎮</span>
+                </div>
+                <div class="mp-modal-badge">🌐 ONLINE MULTIPLAYER</div>
+                <h2 class="mp-modal-title">Host Filmi Battle</h2>
+                <p class="mp-modal-subtitle">Generate custom WhatsApp invite links for your friends and play live remotely!</p>
+            </div>
+
+            <div class="mp-create-form">
+                <!-- Game Selection -->
+                <div class="form-group mb-4">
+                    <label for="mpCreateGameSelect" class="form-label">
+                        <span>🎬 Select Bollywood Game</span>
+                    </label>
+                    <div class="mp-custom-select-wrap">
+                        <select id="mpCreateGameSelect" class="mp-select-input">
+                            <option value="dialogue" selected>🗣️ Dialogue Baazi! (Iconic Punchlines)</option>
+                            <option value="emoji">🔤 Emoji Dhamaka! (Movie Riddles)</option>
+                            <option value="lyrics">🇬🇧 Angrezi Babu, Desi Gaana (Literal Lyrics)</option>
+                            <option value="still">🎬 Scene Dekho! (Freeze-Frame Stills)</option>
+                            <option value="intro">🎧 Sur Sartaaj (Song Intro Music)</option>
+                            <option value="stanza">🎙️ Antara Suno! (Verse Challenge)</option>
+                            <option value="clip">🎬 Action Replay! (Video Scene Clips)</option>
+                        </select>
+                        <span class="mp-select-arrow">▼</span>
+                    </div>
+                </div>
+
+                <!-- Rounds Selection as Pills -->
+                <div class="form-group mb-4">
+                    <label class="form-label">
+                        <span>🎯 Number of Rounds</span>
+                    </label>
+                    <div class="mp-rounds-pills-row">
+                        <button type="button" class="count-pill mp-round-pill" data-rounds="5" onclick="multiplayerClient.selectRoundPill(5)">5</button>
+                        <button type="button" class="count-pill mp-round-pill active" data-rounds="10" onclick="multiplayerClient.selectRoundPill(10)">10</button>
+                        <button type="button" class="count-pill mp-round-pill" data-rounds="15" onclick="multiplayerClient.selectRoundPill(15)">15</button>
+                        <button type="button" class="count-pill mp-round-pill" data-rounds="20" onclick="multiplayerClient.selectRoundPill(20)">20</button>
+                    </div>
+                    <input type="hidden" id="mpCreateRoundsSelect" value="10" />
+                </div>
+
+                <!-- Player Names Input List -->
+                <div class="form-group mb-4">
+                    <div class="label-row-between">
+                        <label class="form-label">
+                            <span>👥 Invited Players (Named Links)</span>
+                        </label>
+                        <button type="button" class="btn-add-player-modern" onclick="multiplayerClient.addPlayerInputRow()">
+                            <span>+ Add Player</span>
+                        </button>
+                    </div>
+                    <div id="mpPlayerInputsContainer" class="mp-player-inputs-container">
+                        <div class="mp-player-row">
+                            <span class="mp-avatar-pill">💃</span>
+                            <div class="mp-input-wrap">
+                                <input type="text" class="form-input mp-player-name-input" placeholder="Player 1 Name (e.g. Pooja)" value="Pooja" />
+                            </div>
+                        </div>
+                        <div class="mp-player-row">
+                            <span class="mp-avatar-pill">🕶️</span>
+                            <div class="mp-input-wrap">
+                                <input type="text" class="form-input mp-player-name-input" placeholder="Player 2 Name (e.g. Rahul)" value="Rahul" />
+                            </div>
+                            <button type="button" class="btn-remove-player" onclick="multiplayerClient.removePlayerRow(this)" title="Remove Player">&times;</button>
+                        </div>
+                        <div class="mp-player-row">
+                            <span class="mp-avatar-pill">👑</span>
+                            <div class="mp-input-wrap">
+                                <input type="text" class="form-input mp-player-name-input" placeholder="Player 3 Name (e.g. Amit)" value="Amit" />
+                            </div>
+                            <button type="button" class="btn-remove-player" onclick="multiplayerClient.removePlayerRow(this)" title="Remove Player">&times;</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mp-create-actions">
+                    <button type="button" id="btnSubmitCreateRoom" class="btn-submit-mp-create" onclick="multiplayerClient.submitCreateRoom()">
+                        <span>🚀 Generate Game Room &amp; Links</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL 5: MULTIPLAYER SHARE LINKS & WHATSAPP
+         ============================================================ -->
+    <div id="multiplayerShareModal" class="modal-overlay">
+        <div class="modal-dialog mp-share-modal-dialog">
+            <button type="button" class="btn-modal-close" onclick="multiplayerClient.hideShareModal()" title="Close">&times;</button>
+            <div class="mp-modal-header">
+                <div class="mp-header-icon-wrap">
+                    <span class="mp-header-icon">🎉</span>
+                </div>
+                <div class="mp-modal-badge">ROOM READY</div>
+                <h2 class="mp-modal-title">Share Invite Links</h2>
+                <div class="mp-room-code-hero">
+                    <span class="room-code-label">ROOM CODE:</span>
+                    <span id="mpShareRoomCode" class="room-code-val">BOL924</span>
+                    <button type="button" id="btnCopyRoomCode" class="btn-copy-code-inline" onclick="multiplayerClient.copyRoomCode()" title="Copy Code">📋</button>
+                </div>
+                <p class="mp-modal-subtitle">Send personalized links directly via WhatsApp. When friends tap their link, they instantly join with their name!</p>
+            </div>
+
+            <!-- Scrollable list of player links -->
+            <div id="mpShareLinksList" class="mp-share-links-list">
+                <!-- Injected dynamically -->
+            </div>
+
+            <!-- Footer Action Buttons -->
+            <div class="mp-share-footer-actions">
+                <button type="button" id="btnCopyAllLinks" class="btn-mp-copy-all" onclick="multiplayerClient.copyAllInviteLinks()">
+                    <span>📋 Copy All WhatsApp Invites</span>
+                </button>
+                <button type="button" id="btnEnterRoomAsHost" class="btn-submit-mp-create">
+                    <span>Enter Room as Host 🎬 &rarr;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Confetti canvas -->
     <canvas id="confettiCanvas"></canvas>
 
     <!-- MSG91 Official OTP Widget SDK -->
     <script type="text/javascript" src="https://verify.msg91.com/otp-provider.js"></script>
 
-    <script src="auth_client.js?v=5.5"></script>
-    <script src="game.js?v=5.5"></script>
-    <script src="party_games.js?v=5.5"></script>
+    <script src="auth_client.js?v=5.6"></script>
+    <script src="multiplayer_client.js?v=2.1"></script>
+    <script src="game.js?v=5.7"></script>
+    <script src="party_games.js?v=5.6"></script>
 </body>
 </html>

@@ -223,7 +223,7 @@
 
         // Gatekeeper: Validate user plan and rounds
         if (window.authManager && typeof window.authManager.checkCanPlay === 'function') {
-            const allowed = await window.authManager.checkCanPlay(mode, roundsToPlay);
+            const allowed = await window.authManager.checkCanPlay(mode, roundsToPlay, () => window.startPartyGame());
             if (!allowed) return;
         }
 

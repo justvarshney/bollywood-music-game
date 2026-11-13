@@ -395,11 +395,13 @@
         // ============================================================
         // PLAY VALIDATION (FREE VS PAID GATEWAY)
         // ============================================================
-        async checkCanPlay(gameId, roundsRequested = 5) {
+        async checkCanPlay(gameId, roundsRequested = 5, onAllowedCallback = null) {
             // 1. Must be logged in
             if (!this.isLoggedIn()) {
                 this.showAuthModal(() => {
-                    this.checkCanPlay(gameId, roundsRequested);
+                    if (typeof onAllowedCallback === 'function') {
+                        onAllowedCallback();
+                    }
                 });
                 return false;
             }

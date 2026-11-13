@@ -17,11 +17,14 @@ import json
 import urllib.request
 import urllib.parse
 import threading
+import base64
+import hashlib
 
 import auth_db
 import msg91_service
+from multiplayer_manager import multiplayer_manager
 
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 3000
 
 # In-memory cache for IP Geo-location lookups
 GEO_CACHE = {}
@@ -206,7 +209,38 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         except Exception:
             return {}
 
+    def handle_websocket_upgrade(self):
+        """Performs RFC 6455 WebSocket Handshake and delegates to Multiplayer Manager."""
+        key = self.headers.get('Sec-WebSocket-Key')
+        if not key:
+            self.send_error(400, "Missing Sec-WebSocket-Key")
+            return
+
+        GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+        sha1 = hashlib.sha1((key + GUID).encode('utf-8')).digest()
+        accept_val = base64.b64encode(sha1).decode('utf-8')
+
+        # Send 101 Switching Protocols
+        self.send_response(101, "Switching Protocols")
+        self.send_header("Upgrade", "websocket")
+        self.send_header("Connection", "Upgrade")
+        self.send_header("Sec-WebSocket-Accept", accept_val)
+        self.end_headers()
+
+        parsed = urllib.parse.urlparse(self.path)
+        params = urllib.parse.parse_qs(parsed.query)
+        room_code = params.get('room', [''])[0].upper()
+        player_token = params.get('token', [''])[0]
+
+        # In ThreadingHTTPServer, this thread stays in handle_ws_connection until socket disconnects
+        multiplayer_manager.handle_ws_connection(self.request, room_code, player_token)
+
     def do_GET(self):
+        # 0. Check if WebSocket upgrade requested for online multiplayer
+        if self.path.startswith('/ws/multiplayer') or self.headers.get('Upgrade', '').lower() == 'websocket':
+            self.handle_websocket_upgrade()
+            return
+
         # Serve favicon.ico safely if requested
         if self.path == '/favicon.ico' and not os.path.isfile('favicon.ico'):
             self.send_response(204)
@@ -281,6 +315,26 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 settings = msg91_service.get_admin_masked_config()
                 self.send_json(200, {"status": "success", "settings": settings, "config": settings})
+                return
+
+            # 7. Online Multiplayer: Room Info
+            elif path == '/api/multiplayer/room-info':
+                code = query.get("code", [""])[0].upper()
+                token = query.get("token", [""])[0]
+                room = multiplayer_manager.get_room(code)
+                if not room:
+                    self.send_json(404, {"status": "error", "message": "Room not found or expired"})
+                    return
+                player = room.get_player(token)
+                self.send_json(200, {
+                    "status": "success",
+                    "roomCode": room.code,
+                    "gameType": room.game_type,
+                    "status": room.status,
+                    "roundCount": room.round_count,
+                    "player": player.to_dict() if player else None,
+                    "lobby": room.get_lobby_state()
+                })
                 return
 
             else:
@@ -543,6 +597,41 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        # 11. Online Multiplayer: Create Game Room & Generate Named Links
+        elif path == '/api/multiplayer/create':
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json(401, {"status": "error", "message": "Please log in with your mobile number to create a multiplayer room."})
+                return
+
+            game_type = body.get('gameType', 'dialogue')
+            round_count = int(body.get('roundCount', 10))
+            player_names = body.get('playerNames', ['Player 1', 'Player 2'])
+
+            proto = self.headers.get('X-Forwarded-Proto')
+            if not proto:
+                proto = 'https' if self.headers.get('X-Forwarded-Ssl') == 'on' else 'http'
+            host_header = self.headers.get('Host', f'localhost:{PORT}')
+            host_origin = f"{proto}://{host_header}"
+
+            ok, msg, room_data = multiplayer_manager.create_room(
+                host_user_id=user["id"],
+                game_type=game_type,
+                round_count=round_count,
+                player_names=player_names,
+                host_origin=host_origin
+            )
+
+            if ok:
+                self.send_json(200, {
+                    "status": "success",
+                    "message": msg,
+                    "data": room_data
+                })
+            else:
+                self.send_json(400, {"status": "error", "message": msg})
+            return
+
         else:
             self.send_json(404, {"status": "error", "message": f"API endpoint not found: {path}"})
             return
@@ -635,7 +724,8 @@ class RangeHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     handler = RangeHTTPRequestHandler
-    server = http.server.HTTPServer(('', PORT), handler)
+    server = http.server.ThreadingHTTPServer(('', PORT), handler)
+    server.daemon_threads = True
     local_ip = get_local_ip()
 
     print('\n' + '='*65, flush=True)
